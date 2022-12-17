@@ -4,8 +4,8 @@ import psycopg2
 
 
 class UserPanel(object):
-    def __init__(self):  #connect_cursor
-        # self.connect_cursor = connect_cursor
+    def __init__(self, connect_cursor):
+        self.connect_cursor = connect_cursor
         self.window = tk.Tk()
     bg_color = "gray75"
 
