@@ -53,6 +53,65 @@ class UserPanel(object):
         table.heading("kolvo_mag", text="Количество магазинов")
         table.place(x=372, y=78)
 
+    def create_administrator_table(self):
+        columns = ("administrator", "imya", "famil", "otch", "telefon")
+        table = ttk.Treeview(columns=columns, show="headings")
+        table.column(column=0, width=150)
+        table.column(column=1, width=216)
+        table.column(column=2, width=215)
+        table.column(column=3, width=216)
+        table.column(column=4, width=210)
+        table.heading("administrator", text="Администратор")
+        table.heading("imya", text="Имя")
+        table.heading("famil", text="Фамилия")
+        table.heading("otch", text="Отчество")
+        table.heading("telefon", text="Телефон")
+        table.place(x=372, y=78)
+
+    def create_magazin_kategor_rayon_view(self):
+        columns = ("magazin_nazv", "kategor_nazv", "rayon_nazv")
+        table = ttk.Treeview(columns=columns, show="headings")
+        table.column(column=0, width=335)
+        table.column(column=1, width=335)
+        table.column(column=2, width=337)
+        table.heading("magazin_nazv", text="Название магазина")
+        table.heading("kategor_nazv", text="Название категории")
+        table.heading("rayon_nazv", text="Название района")
+        table.place(x=372, y=78)
+
+    def create_magazin_kruglosutoch_view(self):
+        columns = ("magazin_magazin", "magazin_nazv")
+        table = ttk.Treeview(columns=columns, show="headings")
+        table.column(column=0, width=300)
+        table.column(column=1, width=707)
+        table.heading("magazin_magazin", text="Магазин")
+        table.heading("magazin_nazv", text="Название Магазина")
+        table.place(x=372, y=78)
+
+    def create_magazin_contact_data_view(self):
+        columns = ("magazin_nazv", "magazin_adress", "magazin_telefon",
+                   "administrator_fio", "administrator_telefon")
+        table = ttk.Treeview(columns=columns, show="headings")
+        table.column(column=0, width=150)
+        table.column(column=1, width=307)
+        table.column(column=2, width=150)
+        table.column(column=3, width=250)
+        table.column(column=4, width=150)
+        table.heading("magazin_nazv", text="Название Магазина")
+        table.heading("magazin_adress", text="Адрес Магазина")
+        table.heading("magazin_telefon", text="Телефон Магазина")
+        table.heading("administrator_fio", text="ФИО администратора")
+        table.heading("administrator_telefon", text="Телефон администратора")
+        table.place(x=372, y=78)
+
+    def create_magazin_count_by_kategor_view(self):
+        columns = ("kategor_nazv", "magazin_count")
+        table = ttk.Treeview(columns=columns, show="headings")
+        table.column(column=0, width=707)
+        table.column(column=1, width=300)
+        table.heading("kategor_nazv", text="Название категории")
+        table.heading("magazin_count", text="Количество магазинов")
+        table.place(x=372, y=78)
 
     def create_window(self):
         self.window.title("Окно пользователя")
@@ -76,7 +135,12 @@ class UserPanel(object):
         ######
         #self.create_magazin_table()
         #self.create_kategor_table()
-        self.create_rayon_table()
+        #self.create_rayon_table()
+        #self.create_administrator_table()
+        #self.create_magazin_kategor_rayon_view()
+        #self.create_magazin_kruglosutoch_view()
+        #self.create_magazin_contact_data_view()
+        #self.create_magazin_count_by_kategor_view()
 
         # enter_button = tk.Button(text="Вход",
         #                          width=50, font=("Verdana", 12),
