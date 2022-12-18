@@ -26,14 +26,18 @@ class UserPanel(object):
             if len(search.get()) > 0:
                 search_str += table["column"][i] + " = " + "'" + (search.get()) + "'" + " and "
             i+=1
-        search_str = search_str[:-4]
-        self.current_columns = " WHERE " + search_str
-        self.connect_cursor.execute("SELECT * from " + table_name + " WHERE " + search_str)
+        if len(search_str) > 0:
+            search_str = " WHERE " + search_str[:-4]
+        else: search_str = ""
+        self.current_columns = search_str
+        self.connect_cursor.execute("SELECT * from " + table_name + search_str)
         records = self.connect_cursor.fetchall()
         table.delete(*table.get_children())
         for record in records:
             table.insert("", tk.END, values=record)
 
+    def hide_buttons(self):
+        self.button_empty.lift()
     def hide_tables(self):
         self.table1.lower()
         self.table2.lower()
@@ -44,9 +48,12 @@ class UserPanel(object):
         self.table7.lower()
         self.table8.lower()
 
-    def show_table(self, table):
+    def show_table(self, table, *args):
         self.hide_tables()
+        self.hide_buttons()
         table.lift()
+        for elem in args:
+            elem.lift()
         self.current_columns = ""
 
     def table_sort(self, column, table, table_name, sort):
@@ -226,7 +233,7 @@ class UserPanel(object):
         magazin_search6 = tk.Entry(width=14, font=("Verdana", 10))
         magazin_search7 = tk.Entry(width=14, font=("Verdana", 10))
         magazin_search8 = tk.Entry(width=14, font=("Verdana", 10))
-        search = tk.Button(text="Поиск",
+        search1 = tk.Button(text="Поиск",
                            width=6, font=("Verdana", 9),
                            command=lambda: self.table_search(self.table1, "magazin", magazin_search1, magazin_search2,
                             magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
@@ -263,48 +270,238 @@ class UserPanel(object):
         magazin_search6.place(x=970, y=10)
         magazin_search7.place(x=1090, y=10)
         magazin_search8.place(x=1210, y=10)
-        search.place(x=1332, y=10)
+        search1.place(x=1332, y=10)
+        ###############################################################################################
+        self.hide_buttons()
+        ####################################### Поиск Категории ######################################
+        kategor_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        kategor_search2 = tk.Entry(width=14, font=("Verdana", 10))
+
+        search2 = tk.Button(text="Поиск",
+                           width=6, font=("Verdana", 9),
+                           command=lambda: self.table_search(self.table2, "kategor", kategor_search1, kategor_search2))
+        kategor_search_but1 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        kategor_search_but2 = tk.Label(text="Название", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        kategor_search_but1.place(x=1090, y=30)
+        kategor_search_but2.place(x=1210, y=30)
+        kategor_search1.place(x=1090, y=10)
+        kategor_search2.place(x=1210, y=10)
+        search2.place(x=1332, y=10)
         ###############################################################################################
 
+        ####################################### Поиск Района ######################################
+        rayon_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        rayon_search2 = tk.Entry(width=14, font=("Verdana", 10))
+        rayon_search3 = tk.Entry(width=14, font=("Verdana", 10))
+        search3 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.table_search(self.table3, "rayon", rayon_search1, rayon_search2,
+                                                              rayon_search3))
+        rayon_search_but1 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        rayon_search_but2 = tk.Label(text="Название", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        rayon_search_but3 = tk.Label(text="Кол-во магазинов", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        rayon_search_but1.place(x=970, y=30)
+        rayon_search_but2.place(x=1090, y=30)
+        rayon_search_but3.place(x=1210, y=30)
+        rayon_search1.place(x=970, y=10)
+        rayon_search2.place(x=1090, y=10)
+        rayon_search3.place(x=1210, y=10)
+        search3.place(x=1332, y=10)
+        ###############################################################################################
+
+        ####################################### Поиск Администратор ######################################
+        administrator_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        administrator_search2 = tk.Entry(width=14, font=("Verdana", 10))
+        administrator_search3 = tk.Entry(width=14, font=("Verdana", 10))
+        administrator_search4 = tk.Entry(width=14, font=("Verdana", 10))
+        administrator_search5 = tk.Entry(width=14, font=("Verdana", 10))
+        search4 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.table_search(self.table4, "administrator", administrator_search1,
+                                                              administrator_search2, administrator_search3,
+                                                              administrator_search4, administrator_search5))
+        administrator_search_but1 = tk.Label(text="Администратор", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        administrator_search_but2 = tk.Label(text="Имя", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        administrator_search_but3 = tk.Label(text="Фамилия", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        administrator_search_but4 = tk.Label(text="Отчество", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        administrator_search_but5 = tk.Label(text="Телефон", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        administrator_search_but1.place(x=730, y=30)
+        administrator_search_but2.place(x=850, y=30)
+        administrator_search_but3.place(x=970, y=30)
+        administrator_search_but4.place(x=1090, y=30)
+        administrator_search_but5.place(x=1210, y=30)
+        administrator_search1.place(x=730, y=10)
+        administrator_search2.place(x=850, y=10)
+        administrator_search3.place(x=970, y=10)
+        administrator_search4.place(x=1090, y=10)
+        administrator_search5.place(x=1210, y=10)
+        search4.place(x=1332, y=10)
+        ###############################################################################################
+
+        ####################################### Поиск Представление 1 ######################################
+        view1_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        view1_search2 = tk.Entry(width=14, font=("Verdana", 10))
+        view1_search3 = tk.Entry(width=14, font=("Verdana", 10))
+        search5 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.table_search(self.table5, "magazin_kategor_rayon", view1_search1, view1_search2,
+                                                              view1_search3))
+        view1_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
+                                     width=14, height=1, font=("Verdana", 9))
+        view1_search_but2 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
+                                     width=14, height=1, font=("Verdana", 9))
+        view1_search_but3 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
+                                     width=14, height=1, font=("Verdana", 9))
+        view1_search_but1.place(x=970, y=30)
+        view1_search_but2.place(x=1090, y=30)
+        view1_search_but3.place(x=1210, y=30)
+        view1_search1.place(x=970, y=10)
+        view1_search2.place(x=1090, y=10)
+        view1_search3.place(x=1210, y=10)
+        search5.place(x=1332, y=10)
+        ###############################################################################################
+
+        ####################################### Поиск Представление 2 ######################################
+        view2_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        view2_search2 = tk.Entry(width=14, font=("Verdana", 10))
+
+        search6 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.table_search(self.table6, "magazin_kruglosutoch", view2_search1, view2_search2))
+        view2_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        view2_search_but2 = tk.Label(text="Название магазина", fg="grey6", bg=self.bg_color,
+                                       width=14, height=1, font=("Verdana", 9))
+        view2_search_but1.place(x=1090, y=30)
+        view2_search_but2.place(x=1210, y=30)
+        view2_search1.place(x=1090, y=10)
+        view2_search2.place(x=1210, y=10)
+        search6.place(x=1332, y=10)
+        ###############################################################################################
+
+        ####################################### Поиск Представление 3 ######################################
+        view3_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        view3_search2 = tk.Entry(width=14, font=("Verdana", 10))
+        view3_search3 = tk.Entry(width=14, font=("Verdana", 10))
+        view3_search4 = tk.Entry(width=14, font=("Verdana", 10))
+        view3_search5 = tk.Entry(width=14, font=("Verdana", 10))
+        search7 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.table_search(self.table7, "magazin_contact_data", view3_search1,
+                                                              view3_search2, view3_search3,
+                                                              view3_search4, view3_search5))
+        view3_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
+                                             width=14, height=1, font=("Verdana", 9))
+        view3_search_but2 = tk.Label(text="Адрес", fg="grey6", bg=self.bg_color,
+                                             width=14, height=1, font=("Verdana", 9))
+        view3_search_but3 = tk.Label(text="Телефон", fg="grey6", bg=self.bg_color,
+                                             width=14, height=1, font=("Verdana", 9))
+        view3_search_but4 = tk.Label(text="ФИО Админа", fg="grey6", bg=self.bg_color,
+                                             width=14, height=1, font=("Verdana", 9))
+        view3_search_but5 = tk.Label(text="Телефон Админа", fg="grey6", bg=self.bg_color,
+                                             width=14, height=1, font=("Verdana", 9))
+        view3_search_but1.place(x=730, y=30)
+        view3_search_but2.place(x=850, y=30)
+        view3_search_but3.place(x=970, y=30)
+        view3_search_but4.place(x=1090, y=30)
+        view3_search_but5.place(x=1210, y=30)
+        view3_search1.place(x=730, y=10)
+        view3_search2.place(x=850, y=10)
+        view3_search3.place(x=970, y=10)
+        view3_search4.place(x=1090, y=10)
+        view3_search5.place(x=1210, y=10)
+        search7.place(x=1332, y=10)
+        ###############################################################################################
+
+        ####################################### Поиск Представление 4 ######################################
+        view4_search1 = tk.Entry(width=14, font=("Verdana", 10))
+        view4_search2 = tk.Entry(width=14, font=("Verdana", 10))
+
+        search8 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.table_search(self.table8, "magazin_count_by_kategor", view4_search1,
+                                                              view4_search2))
+        view4_search_but1 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
+                                     width=14, height=1, font=("Verdana", 9))
+        view4_search_but2 = tk.Label(text="Кол-во магазинов", fg="grey6", bg=self.bg_color,
+                                     width=14, height=1, font=("Verdana", 9))
+        view4_search_but1.place(x=1090, y=30)
+        view4_search_but2.place(x=1210, y=30)
+        view4_search1.place(x=1090, y=10)
+        view4_search2.place(x=1210, y=10)
+        search8.place(x=1332, y=10)
+        ###############################################################################################
 
         menu.place(x=62, y=20)
         table_block.place(x=363, y=72)
         block.place(x=0, y=0)
-
+        ####################################### Кнопки таблиц ######################################
         magazin_button = tk.Button(text="Магазины",
                                  width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table1))
+                                   command=lambda: self.show_table(self.table1, magazin_search1, magazin_search2,
+                            magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
+                            magazin_search8, magazin_search_but1,magazin_search_but2, magazin_search_but3,
+                            magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
+                            magazin_search_but8, search1))
         kategor_button = tk.Button(text="Категории",
                                  width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table2))
+                                   command=lambda: self.show_table(self.table2, kategor_search1, kategor_search2,
+                            kategor_search_but1, kategor_search_but2, search2))
         rayon_button = tk.Button(text="Районы",
                                  width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table3))
+                                   command=lambda: self.show_table(self.table3, rayon_search1, rayon_search2,
+                            rayon_search3, rayon_search_but1, rayon_search_but2, rayon_search_but3, search3))
         admin_button = tk.Button(text="Администраторы",
                                  width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table4))
+                                   command=lambda: self.show_table(self.table4, administrator_search1, administrator_search2,
+                            administrator_search3, administrator_search4, administrator_search5, administrator_search_but1,
+                            administrator_search_but2, administrator_search_but3, administrator_search_but4,
+                            administrator_search_but5,  search4))
         magazin_button.place(x=370, y=75)
         kategor_button.place(x=625, y=75)
         rayon_button.place(x=879, y=75)
         admin_button.place(x=1134, y=75)
+        ###############################################################################################
 
+        ####################################### Кнопки Представлений ######################################
         view1_button = tk.Button(text="Магазин-категория-район",
                                    width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table5))
+                                   command=lambda: self.show_table(self.table5, view1_search1, view1_search2,
+                            view1_search3, view1_search_but1, view1_search_but2, view1_search_but3, search5))
         view2_button = tk.Button(text="круглосуточные магазины",
                                    width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table6))
+                                   command=lambda: self.show_table(self.table6, view2_search1, view2_search2,
+                            view2_search_but1, view2_search_but2, search6))
         view3_button = tk.Button(text="Контактные данные магазина",
                                  width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table7))
+                                   command=lambda: self.show_table(self.table7, view3_search1, view3_search2,
+                            view3_search3, view3_search4, view3_search5, view3_search_but1,
+                            view3_search_but2, view3_search_but3, view3_search_but4,
+                            view3_search_but5,  search7))
         view4_button = tk.Button(text="Кол. магазинов (категории)",
                                  width=24, font=("Verdana", 12),
-                                   command=lambda: self.show_table(self.table8))
+                                   command=lambda: self.show_table(self.table8, view4_search1, view4_search2,
+                            view4_search_but1, view4_search_but2, search8))
         view1_button.place(x=370, y=658)
         view2_button.place(x=625, y=658)
         view3_button.place(x=879, y=658)
         view4_button.place(x=1134, y=658)
-        self.show_table(self.table1)
+        ###############################################################################################
+        self.show_table(self.table1, magazin_search1, magazin_search2,
+                        magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
+                        magazin_search8, magazin_search_but1, magazin_search_but2, magazin_search_but3,
+                        magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
+                        magazin_search_but8, search1)
 
 
         self.window.mainloop()
