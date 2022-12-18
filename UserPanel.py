@@ -1,5 +1,6 @@
 import tkinter.ttk as ttk
 import tkinter as tk
+from tkinter import Listbox
 import psycopg2
 
 
@@ -36,6 +37,23 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
 
+    def callback(self, list):
+        print(list.curselection())
+    def request_constr(self):
+        self.hide_buttons()
+        OptionList = ["Таблица", "Магазин", "Категория", "Район", "Администратор"]
+        list = Listbox(self.window, selectmode="multiple")
+
+        list.place(x=0, y=0)
+
+        for each_item in range(len(OptionList)):
+            list.insert(tk.END, OptionList[each_item])
+
+
+        search8 = tk.Button(text="Поиск",
+                            width=6, font=("Verdana", 9),
+                            command=lambda: self.callback(list))
+        search8.place(x=1332, y=10)
     def hide_buttons(self):
         self.button_empty.lift()
     def hide_tables(self):
@@ -215,6 +233,7 @@ class UserPanel(object):
         self.window["bg"] = self.bg_color
 
         block = tk.Label(width=50, height=47, bg="grey38", relief=tk.RAISED)
+        block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         table_block = tk.Label(width=146, height=41, bg="grey25", relief=tk.RAISED)
         menu = tk.Label(
             text="Меню",
@@ -441,9 +460,9 @@ class UserPanel(object):
         view4_search2.place(x=1210, y=10)
         search8.place(x=1332, y=10)
         ###############################################################################################
-
-        menu.place(x=62, y=20)
+        menu.place(x=56, y=20)
         table_block.place(x=363, y=72)
+        block2.place(x=360, y=-2)
         block.place(x=0, y=0)
         ####################################### Кнопки таблиц ######################################
         magazin_button = tk.Button(text="Магазины",
@@ -497,6 +516,22 @@ class UserPanel(object):
         view3_button.place(x=879, y=658)
         view4_button.place(x=1134, y=658)
         ###############################################################################################
+
+        ################################### Кнопки Меню ##########################################
+        view_button = tk.Button(text="Просмотр таблиц", bg=self.bg_color,
+                                   width=24, font=("Verdana", 14),
+                                   command=lambda: self.show_table(self.table2, kategor_search1, kategor_search2,
+                                                                   kategor_search_but1, kategor_search_but2, search2))
+
+        view_button.place(x=32, y=200)
+
+        request_constr_button = tk.Button(text="Конструктор запросов", bg=self.bg_color,
+                                width=24, font=("Verdana", 14),
+                                command=lambda: self.request_constr())
+
+        request_constr_button.place(x=32, y=260)
+        ###############################################################################################
+
         self.show_table(self.table1, magazin_search1, magazin_search2,
                         magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
                         magazin_search8, magazin_search_but1, magazin_search_but2, magazin_search_but3,
