@@ -17,7 +17,7 @@ class UserPanel(object):
         self.table7 = self.create_magazin_contact_data_view()
         self.table8 = self.create_magazin_count_by_kategor_view()
         self.current_columns = ""
-        self.search_empty = tk.Label( fg="grey6", bg=self.bg_color, width=147, height=5)
+        self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=5)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         self.buttons_list = []
     bg_color = "gray75"
@@ -41,20 +41,34 @@ class UserPanel(object):
 
     def view_tables(self):
         pass
-    def callback(self, list):
-        print(list.curselection())
+    def option_show(self, block, button, hide):
+        if hide:
+            block.lower()
+        else: block.lift()
+        button['command'] = lambda: self.option_show(block, button, not hide)
 
-    def constructor_option_create(self, columns_name_list):
-        magazin_columns = [tk.IntVar()] * len(columns_name_list)
-        magazin_columns_opt = []
-        for name in columns_name_list:
-            magazin_columns_opt.append(
-                tk.Checkbutton(self.window, text=name, variable=magazin_columns[columns_name_list.index(name)],
-                               font=("Verdana", 9)))
-        indent = 40
-        for column in magazin_columns_opt:
-            column.place(x=370, y=indent)
-            indent += 30
+    def constructor_option_create(self, columns_name_list, x, entry_indent, but_indent=50):
+        but_indent += 3
+        magazin_entry = []
+        magazin_blocks = []
+        magazin_plus = []
+        for i in range(len(columns_name_list)):
+            magazin_entry.append(tk.Entry(width=14, font=("Verdana", 9)))
+            magazin_plus.append(tk.Label(text='+', fg="blue", bg=self.bg_color, width=1, height=1, font=("Verdana", 12)))
+            magazin_blocks.append(tk.Label(bg=self.bg_color, width=18, height=1, font=("Verdana", 9)))
+        for entry in magazin_entry:
+            entry.place(x=x+entry_indent, y=but_indent)
+            but_indent += 26
+        but_indent -= (26 * len(columns_name_list))
+        for block in magazin_blocks:
+            block.place(x=x+entry_indent - 30, y=but_indent)
+            but_indent += 26
+        but_indent -= (26 * len(columns_name_list)) + 4
+        for plus in magazin_plus:
+            plus.place(x=x + entry_indent - 30, y=but_indent)
+            but_indent += 26
+        return magazin_blocks
+
     def request_constr(self):
         self.block2.lift()
         magazin = tk.IntVar()
@@ -68,17 +82,30 @@ class UserPanel(object):
         administrator_opt = tk.Checkbutton(self.window, text="Администратор", variable=administrator, font=("Verdana", 12))
 
         magazin_opt.place(x=370, y=10)
-        rayon_opt.place(x=635, y=10)
-        kategor_opt.place(x=900, y=10)
-        administrator_opt.place(x=1200, y=10)
+        rayon_opt.place(x=760, y=10)
+        kategor_opt.place(x=760, y=166)
+        administrator_opt.place(x=1150, y=10)
 
         ###################################
-        rayon_columns = [tk.IntVar()]*3
-        kategor_columns = [tk.IntVar()]*2
-        administrator_columns = [tk.IntVar()]*5
-        magazin_columns_name = ['код_магазина', 'Район', 'Адрес', 'Часы работы', 'Телефон', 'Категория магазина',
-                                'Название магазина', 'Администратор']
-        self.constructor_option_create(magazin_columns_name)
+        magazin_blocks = self.constructor_option_create(['Район', 'Адрес', 'Часы работы', 'Телефон', 'Категория магазина',
+                                        'Название магазина', 'Администратор'], 370, 170)
+        b1 = tk.Button(text='Район', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[0], b1, True))
+        b2 = tk.Button(text='Адрес', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[1], b2, True))
+        b3 = tk.Button(text='Часы работы', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[2], b3, True))
+        b4 = tk.Button(text='Телефон', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[3], b4, True))
+        b5 = tk.Button(text='Категория магазина', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[4], b5, True))
+        b6 = tk.Button(text='Название магазина', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[5], b6, True))
+        b7 = tk.Button(text='Администратор', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[6], b7, True))
+        but_indent = 50
+        for button in [b1, b2, b3, b4, b5, b6, b7]:
+            button.place(x=370, y=but_indent)
+            but_indent += 26
+        self.constructor_option_create(
+            ['Название района', 'Кол. магазинов'], 760, 150)
+        self.constructor_option_create(
+            ['Название'], 760, 150, 206)
+        self.constructor_option_create(
+            ['Фамилия', 'Имя', 'Отчество', 'телефон'], 1150, 100)
 
         ##################################
 
@@ -95,9 +122,7 @@ class UserPanel(object):
         #     list.insert(tk.END, OptionList[each_item])
         #
         #
-        # search8 = tk.Button(text="Поиск",
-        #                     width=6, font=("Verdana", 9),
-        #                     command=lambda: self.callback(list))
+        # search8 = tk.Button(text="Поиск", width=6, font=("Verdana", 9), command=lambda: self.callback(list))
         # search8.place(x=1332, y=10)
     def hide_buttons(self):
         self.search_empty.lift()
