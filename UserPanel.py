@@ -17,7 +17,7 @@ class UserPanel(object):
         self.table7 = self.create_magazin_contact_data_view()
         self.table8 = self.create_magazin_count_by_kategor_view()
         self.current_columns = ""
-        self.search_empty = tk.Label( fg="grey6", bg=self.bg_color, width=147, height=4)
+        self.search_empty = tk.Label( fg="grey6", bg=self.bg_color, width=147, height=5)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         self.buttons_list = []
     bg_color = "gray75"
@@ -43,6 +43,18 @@ class UserPanel(object):
         pass
     def callback(self, list):
         print(list.curselection())
+
+    def constructor_option_create(self, columns_name_list):
+        magazin_columns = [tk.IntVar()] * len(columns_name_list)
+        magazin_columns_opt = []
+        for name in columns_name_list:
+            magazin_columns_opt.append(
+                tk.Checkbutton(self.window, text=name, variable=magazin_columns[columns_name_list.index(name)],
+                               font=("Verdana", 9)))
+        indent = 40
+        for column in magazin_columns_opt:
+            column.place(x=370, y=indent)
+            indent += 30
     def request_constr(self):
         self.block2.lift()
         magazin = tk.IntVar()
@@ -50,10 +62,10 @@ class UserPanel(object):
         kategor = tk.IntVar()
         administrator = tk.IntVar()
 
-        magazin_opt = tk.Checkbutton(self.window, text="Магазин", variable=magazin, onvalue=1, offvalue=0, font=("Verdana", 12))
-        rayon_opt = tk.Checkbutton(self.window, text="Район", variable=rayon, onvalue=2, offvalue=0, font=("Verdana", 12))
-        kategor_opt = tk.Checkbutton(self.window, text="Категория", variable=kategor, onvalue=3, offvalue=0, font=("Verdana", 12))
-        administrator_opt = tk.Checkbutton(self.window, text="Администратор", variable=administrator, onvalue=4, offvalue=0, font=("Verdana", 12))
+        magazin_opt = tk.Checkbutton(self.window, text="Магазин", variable=magazin, font=("Verdana", 12))
+        rayon_opt = tk.Checkbutton(self.window, text="Район", variable=rayon, font=("Verdana", 12))
+        kategor_opt = tk.Checkbutton(self.window, text="Категория", variable=kategor, font=("Verdana", 12))
+        administrator_opt = tk.Checkbutton(self.window, text="Администратор", variable=administrator, font=("Verdana", 12))
 
         magazin_opt.place(x=370, y=10)
         rayon_opt.place(x=635, y=10)
@@ -61,10 +73,13 @@ class UserPanel(object):
         administrator_opt.place(x=1200, y=10)
 
         ###################################
-        magazin = tk.IntVar()
-        rayon = tk.IntVar()
-        kategor = tk.IntVar()
-        administrator = tk.IntVar()
+        rayon_columns = [tk.IntVar()]*3
+        kategor_columns = [tk.IntVar()]*2
+        administrator_columns = [tk.IntVar()]*5
+        magazin_columns_name = ['код_магазина', 'Район', 'Адрес', 'Часы работы', 'Телефон', 'Категория магазина',
+                                'Название магазина', 'Администратор']
+        self.constructor_option_create(magazin_columns_name)
+
         ##################################
 
         # block = tk.Label(width=146, height=41, bg="grey25", relief=tk.RAISED)
@@ -90,18 +105,8 @@ class UserPanel(object):
     def show_buttons(self):
         for button in self.buttons_list:
             button.lift()
-    def hide_tables(self):
-        self.table1.lower()
-        self.table2.lower()
-        self.table3.lower()
-        self.table4.lower()
-        self.table5.lower()
-        self.table6.lower()
-        self.table7.lower()
-        self.table8.lower()
 
     def show_table_block(self, table, *args):
-        self.hide_tables()
         self.hide_buttons()
         for elem in args:
             elem.lift()
