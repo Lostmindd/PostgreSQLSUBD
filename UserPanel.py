@@ -17,10 +17,10 @@ class UserPanel(object):
         self.table7 = self.create_magazin_contact_data_view()
         self.table8 = self.create_magazin_count_by_kategor_view()
         self.search_where_condition = ""
+        self.bg_color = "gray75"
         self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=4)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         self.buttons_list = []
-    bg_color = "gray75"
 
     def table_search(self, table, table_name, *args):
         search_str = ""
@@ -33,7 +33,9 @@ class UserPanel(object):
             search_str = search_str[:-4]
         else: search_str = ""
         self.search_where_condition = search_str
-        self.connect_cursor.execute("SELECT * from " + table_name + " WHERE " + search_str)
+        if search_str == "":
+            self.connect_cursor.execute("SELECT * from " + table_name)
+        else: self.connect_cursor.execute("SELECT * from " + table_name + " WHERE " + search_str)
         records = self.connect_cursor.fetchall()
         table.delete(*table.get_children())
         for record in records:
@@ -274,11 +276,15 @@ class UserPanel(object):
         self.show_buttons()
 
     def table_sort(self, column, table, sort, table_name, select_columns='*', where_statement=''):
-        if where_statement == '':
+        quary = ''
+        if where_statement == '' and self.search_where_condition == '':
+            quary = "SELECT " + select_columns + " from " + table_name
+        elif where_statement == '':
             where_statement = self.search_where_condition
+            quary = "SELECT " + select_columns + " from " + table_name + " where " + where_statement
         if sort:
-            self.connect_cursor.execute("SELECT " + select_columns + " from " + table_name + " where " + where_statement + " ORDER BY " + column + " ASC")
-        else: self.connect_cursor.execute("SELECT " + select_columns + " from " + table_name + " where " + where_statement + " ORDER BY " + column + " DESC")
+            self.connect_cursor.execute(quary + " ORDER BY " + column + " ASC")
+        else: self.connect_cursor.execute(quary + " ORDER BY " + column + " DESC")
         records = self.connect_cursor.fetchall()
         table.delete(*table.get_children())
         for record in records:
@@ -792,5 +798,5 @@ class UserPanel(object):
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
                         magazin_search_but8, search1)
 
-        self.request_constructor()
+        #self.request_constructor()
         self.window.mainloop()

@@ -2,6 +2,7 @@ import sys
 import psycopg2
 import UserPanel
 import LoginWindow
+import AdminPanel
 import hashlib
 
 
@@ -27,7 +28,6 @@ connect_cursor = connection.cursor()
 #
 #
 
-user_window = UserPanel.UserPanel(connect_cursor)
-user_window.create_window()
-
+admin_window = AdminPanel.AdminPanel(connect_cursor)
+admin_window.create_window()
 connect_cursor.close()
