@@ -88,6 +88,7 @@ class UserPanel(object):
                       self.create_where_line(kategor_columns_name, kategor_entry, ' kategor') +
                       self.create_where_line(admin_columns_name, admin_entry, 'administrator'))[:-5]
 
+
         print(query_str)
 
 
