@@ -16,7 +16,7 @@ class UserPanel(object):
         self.table6 = self.create_magazin_kruglosutoch_view()
         self.table7 = self.create_magazin_contact_data_view()
         self.table8 = self.create_magazin_count_by_kategor_view()
-        self.current_columns = ""
+        self.search_where_condition = ""
         self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=4)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         self.buttons_list = []
@@ -30,10 +30,10 @@ class UserPanel(object):
                 search_str += table["column"][i] + " = " + "'" + (search.get()) + "'" + " and "
             i+=1
         if len(search_str) > 0:
-            search_str = " WHERE " + search_str[:-4]
+            search_str = search_str[:-4]
         else: search_str = ""
-        self.current_columns = search_str
-        self.connect_cursor.execute("SELECT * from " + table_name + search_str)
+        self.search_where_condition = search_str
+        self.connect_cursor.execute("SELECT * from " + table_name + " WHERE " + search_str)
         records = self.connect_cursor.fetchall()
         table.delete(*table.get_children())
         for record in records:
@@ -53,6 +53,14 @@ class UserPanel(object):
                 entry.insert(0, "none")
         button['command'] = lambda: self.block_show(block, button, not hide, entry)
 
+
+    def constructor_table_columns(self, columns, entry, table_name):
+        selected_columns = []
+        for i in range(len(columns)):
+            if entry[i].get() != 'none':
+                selected_columns.append(table_name + "_" + columns[i])
+        return selected_columns
+
     def create_select_line(self, columns, entry, table_name):
         select_str = ""
         for i in range(len(columns)):
@@ -66,7 +74,7 @@ class UserPanel(object):
             if entry[i].get() != 'none' and entry[i].get() != '':
                 select_str += table_name + "." + columns[i] + " " + entry[i].get() + " and  "
         return select_str
-    def table_search_by_constructor(self, magazin_entry, rayon_entry, kategor_entry, admin_entry):
+    def form_request(self, magazin_entry, rayon_entry, kategor_entry, admin_entry):
         magazin_columns_name = ["rayon", "adress", "chas_rab", "telefon", "kategor", "nazv", "administrator"]
         rayon_columns_name = ["nazv", "kolvo_mag"]
         kategor_columns_name = ["nazv"]
@@ -76,18 +84,25 @@ class UserPanel(object):
         rayon_select_line = self.create_select_line(rayon_columns_name, rayon_entry, 'rayon')
         kategor_select_line = self.create_select_line(kategor_columns_name, kategor_entry, ' kategor')
         admin_select_line = self.create_select_line(admin_columns_name, admin_entry, 'administrator')
-        query_str = "SELECT " + (magazin_select_line + rayon_select_line + kategor_select_line + admin_select_line)[:-2] + " FROM magazin "
+        query_select_part = (magazin_select_line + rayon_select_line + kategor_select_line + admin_select_line)[:-2]
+        query_from_part = "magazin "
         if rayon_select_line != "":
-            query_str += " LEFT JOIN rayon on magazin.rayon = rayon.rayon "
+            query_from_part += " LEFT JOIN rayon on magazin.rayon = rayon.rayon "
         if kategor_select_line != "":
-            query_str += " LEFT JOIN kategor on magazin.kategor = kategor.kategor "
+            query_from_part += " LEFT JOIN kategor on magazin.kategor = kategor.kategor "
         if admin_select_line != "":
-            query_str += " LEFT JOIN administrator on magazin.administrator = administrator.administrator "
-        query_str += ("WHERE " + self.create_where_line(magazin_columns_name, magazin_entry, 'magazin') +
+            query_from_part += " LEFT JOIN administrator on magazin.administrator = administrator.administrator "
+        query_where_part = ( self.create_where_line(magazin_columns_name, magazin_entry, 'magazin') +
                       self.create_where_line(rayon_columns_name, rayon_entry, 'rayon') +
                       self.create_where_line(kategor_columns_name, kategor_entry, ' kategor') +
                       self.create_where_line(admin_columns_name, admin_entry, 'administrator'))[:-6]
-        self.create_constructor_query_table(query_str)
+
+        columns = (self.constructor_table_columns(magazin_columns_name, magazin_entry, 'magazin') +
+        self.constructor_table_columns(rayon_columns_name, rayon_entry, 'rayon') +
+        self.constructor_table_columns(kategor_columns_name, kategor_entry, 'kategor') +
+        self.constructor_table_columns(admin_columns_name, admin_entry, 'administrator'))
+
+        self.create_constructor_query_table(query_select_part, query_from_part, query_where_part, columns)
 
 
     def constructor_columns_entry_create(self, count, x, but_indent=80):
@@ -102,24 +117,32 @@ class UserPanel(object):
             but_indent += 26
         return magazin_entry
 
-    def create_constructor_query_table(self, query):
+    def create_constructor_query_table(self, query_select_part, query_from_part, query_where_part, columns):
+        names_on_rus = {'magazin_rayon': 'Район', 'magazin_adress': 'Адрес', 'magazin_chas_rab': 'Часы Работы', 'magazin_telefon': 'Телефон маг.', 'magazin_kategor': 'Категория',
+                        'magazin_nazv': 'Название маг.', 'magazin_administrator': 'Администратор', 'rayon_nazv': 'Название район', 'rayon_kolvo_mag': 'Кол. магазин', 'kategor_nazv': 'Категория',
+                        'administrator_famil': 'Фамилия', 'administrator_imya': 'Имя', 'administrator_otch': 'Отчество', 'administrator_telefon': 'Телефон адм.'}
+        if query_select_part == "":
+            query = "SELECT * " + " FROM " + query_from_part
+        else:
+            query = "SELECT " + query_select_part + " FROM " + query_from_part
+        if query_where_part != "":
+            query += " WHERE " + query_where_part
+
         self.connect_cursor.execute(query)
         records = self.connect_cursor.fetchall()
 
-        table = ttk.Treeview(columns=columns, show="headings", height=10)
-        table.column(column=0, width=300)
-        table.column(column=1, width=707)
-        table.heading("kategor", text="Категория",
-                      command=lambda: self.table_sort(columns[0], self.table2, "kategor", False))
-        table.heading("nazv", text="Название",
-                      command=lambda: self.table_sort(columns[1], self.table2, "kategor", False))
-        table.place(x=372, y=109)
+        table = ttk.Treeview(columns=columns, show="headings", height=17)
+        if len(columns) == 0: column_size = 125
+        else: column_size = int(1007 / len(columns))
+        for i in range(len(columns)):
+            table.column(column=i, width=column_size)
 
-        self.connect_cursor.execute("SELECT * from kategor")
-        records = self.connect_cursor.fetchall()
+        for column in columns:
+            table.heading(column, text=names_on_rus[column])
+        table.place(x=372, y=315)
+
         for record in records:
             table.insert("", tk.END, values=record)
-        return table
     def constructor_columns_buttons_create(self, columns_name_list, x, but_indent=80):
         entry_indent = 170
         but_indent += 3
@@ -155,7 +178,7 @@ class UserPanel(object):
         administrator_but.place(x=1050, y=10)
 
         constructor_search = tk.Button(text='Поиск', width=25, font=("Verdana", 13),
-                                command=lambda: self.table_search_by_constructor(magazin_entry, rayon_entry, kategor_entry, admin_entry))
+                                       command=lambda: self.form_request(magazin_entry, rayon_entry, kategor_entry, admin_entry))
         constructor_search.place(x=1050, y=250)
         ###################################
 
@@ -247,18 +270,20 @@ class UserPanel(object):
         for elem in args:
             elem.lift()
         table.lift()
-        self.current_columns = ""
+        self.search_where_condition = ""
         self.show_buttons()
 
-    def table_sort(self, column, table, table_name, sort):
+    def table_sort(self, column, table, sort, table_name, select_columns='*', where_statement=''):
+        if where_statement == '':
+            where_statement = self.search_where_condition
         if sort:
-            self.connect_cursor.execute("SELECT * from " + table_name + self.current_columns + " ORDER BY " + column + " ASC")
-        else: self.connect_cursor.execute("SELECT * from " + table_name + self.current_columns + " ORDER BY " + column + " DESC")
+            self.connect_cursor.execute("SELECT " + select_columns + " from " + table_name + " where " + where_statement + " ORDER BY " + column + " ASC")
+        else: self.connect_cursor.execute("SELECT " + select_columns + " from " + table_name + " where " + where_statement + " ORDER BY " + column + " DESC")
         records = self.connect_cursor.fetchall()
         table.delete(*table.get_children())
         for record in records:
             table.insert("", tk.END, values=record)
-        table.heading(column, command=lambda: self.table_sort(column, table, table_name, not sort))
+        table.heading(column, command=lambda: self.table_sort(column, table, not sort, table_name))
     def create_magazin_table(self):
         columns = ("magazin", "rayon", "kategor", "administrator", "adress",
                    "chas_rab", "telefon", "nazv")
@@ -271,14 +296,21 @@ class UserPanel(object):
         table.column(column=5, width=100)
         table.column(column=6, width=120)
         table.column(column=7, width=200)
-        table.heading("magazin", text="Магазин", command=lambda: self.table_sort(columns[0], self.table1, "magazin", False))
-        table.heading("rayon", text="Район", command=lambda: self.table_sort(columns[1], self.table1, "magazin", False))
-        table.heading("kategor", text="Категория", command=lambda: self.table_sort(columns[2], self.table1, "magazin", False))
-        table.heading("administrator", text="Администратор", command=lambda: self.table_sort(columns[3], self.table1, "magazin", False))
-        table.heading("adress", text="Адресс", command=lambda: self.table_sort(columns[4], self.table1, "magazin", False))
-        table.heading("chas_rab", text="Часы Работы", command=lambda: self.table_sort(columns[5], self.table1, "magazin", False))
-        table.heading("telefon", text="Телефон", command=lambda: self.table_sort(columns[6], self.table1, "magazin", False))
-        table.heading("nazv", text="Название", command=lambda: self.table_sort(columns[7], self.table1, "magazin", False))
+        table.heading("magazin", text="Магазин", command=lambda: self.table_sort(columns[0], self.table1, False,
+                                                                                 "magazin"))
+        table.heading("rayon", text="Район", command=lambda: self.table_sort(columns[1], self.table1, False, "magazin"))
+        table.heading("kategor", text="Категория", command=lambda: self.table_sort(columns[2], self.table1, False,
+                                                                                   "magazin"))
+        table.heading("administrator", text="Администратор", command=lambda: self.table_sort(columns[3], self.table1,
+                                                                                             False, "magazin"))
+        table.heading("adress", text="Адресс", command=lambda: self.table_sort(columns[4], self.table1, False,
+                                                                               "magazin"))
+        table.heading("chas_rab", text="Часы Работы", command=lambda: self.table_sort(columns[5], self.table1, False,
+                                                                                      "magazin"))
+        table.heading("telefon", text="Телефон", command=lambda: self.table_sort(columns[6], self.table1, False,
+                                                                                 "magazin"))
+        table.heading("nazv", text="Название", command=lambda: self.table_sort(columns[7], self.table1, False,
+                                                                               "magazin"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from magazin")
@@ -292,8 +324,10 @@ class UserPanel(object):
         table = ttk.Treeview(columns=columns, show="headings", height=26)
         table.column(column=0, width=300)
         table.column(column=1, width=707)
-        table.heading("kategor", text="Категория", command=lambda: self.table_sort(columns[0], self.table2, "kategor", False))
-        table.heading("nazv", text="Название", command=lambda: self.table_sort(columns[1], self.table2, "kategor", False))
+        table.heading("kategor", text="Категория", command=lambda: self.table_sort(columns[0], self.table2, False,
+                                                                                   "kategor"))
+        table.heading("nazv", text="Название", command=lambda: self.table_sort(columns[1], self.table2, False,
+                                                                               "kategor"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from kategor")
@@ -307,9 +341,10 @@ class UserPanel(object):
         table.column(column=0, width=300)
         table.column(column=1, width=300)
         table.column(column=2, width=407)
-        table.heading("rayon", text="Район", command=lambda: self.table_sort(columns[0], self.table3, "rayon", False))
-        table.heading("nazv", text="Название", command=lambda: self.table_sort(columns[1], self.table3, "rayon", False))
-        table.heading("kolvo_mag", text="Количество магазинов", command=lambda: self.table_sort(columns[2], self.table3, "rayon", False))
+        table.heading("rayon", text="Район", command=lambda: self.table_sort(columns[0], self.table3, False, "rayon"))
+        table.heading("nazv", text="Название", command=lambda: self.table_sort(columns[1], self.table3, False, "rayon"))
+        table.heading("kolvo_mag", text="Количество магазинов", command=lambda: self.table_sort(columns[2], self.table3,
+                                                                                                False, "rayon"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from rayon")
@@ -325,11 +360,16 @@ class UserPanel(object):
         table.column(column=2, width=215)
         table.column(column=3, width=216)
         table.column(column=4, width=210)
-        table.heading("administrator", text="Администратор", command=lambda: self.table_sort(columns[0], self.table4, "administrator", False))
-        table.heading("imya", text="Имя", command=lambda: self.table_sort(columns[1], self.table4, "administrator", False))
-        table.heading("famil", text="Фамилия", command=lambda: self.table_sort(columns[2], self.table4, "administrator", False))
-        table.heading("otch", text="Отчество", command=lambda: self.table_sort(columns[3], self.table4, "administrator", False))
-        table.heading("telefon", text="Телефон", command=lambda: self.table_sort(columns[4], self.table4, "administrator", False))
+        table.heading("administrator", text="Администратор", command=lambda: self.table_sort(columns[0], self.table4,
+                                                                                             False, "administrator"))
+        table.heading("imya", text="Имя", command=lambda: self.table_sort(columns[1], self.table4, False,
+                                                                          "administrator"))
+        table.heading("famil", text="Фамилия", command=lambda: self.table_sort(columns[2], self.table4, False,
+                                                                               "administrator"))
+        table.heading("otch", text="Отчество", command=lambda: self.table_sort(columns[3], self.table4, False,
+                                                                               "administrator"))
+        table.heading("telefon", text="Телефон", command=lambda: self.table_sort(columns[4], self.table4, False,
+                                                                                 "administrator"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from administrator")
@@ -343,9 +383,14 @@ class UserPanel(object):
         table.column(column=0, width=335)
         table.column(column=1, width=335)
         table.column(column=2, width=337)
-        table.heading("Название", text="Название магазина", command=lambda: self.table_sort(columns[0], self.table5, "magazin_kategor_rayon", False))
-        table.heading("Категория", text="Название категории", command=lambda: self.table_sort(columns[1], self.table5, "magazin_kategor_rayon", False))
-        table.heading("Район", text="Название района", command=lambda: self.table_sort(columns[2], self.table5, "magazin_kategor_rayon", False))
+        table.heading("Название", text="Название магазина", command=lambda: self.table_sort(columns[0], self.table5,
+                                                                                            False,
+                                                                                            "magazin_kategor_rayon"))
+        table.heading("Категория", text="Название категории", command=lambda: self.table_sort(columns[1], self.table5,
+                                                                                              False,
+                                                                                              "magazin_kategor_rayon"))
+        table.heading("Район", text="Название района", command=lambda: self.table_sort(columns[2], self.table5, False,
+                                                                                       "magazin_kategor_rayon"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from magazin_kategor_rayon")
@@ -358,8 +403,11 @@ class UserPanel(object):
         table = ttk.Treeview(columns=columns, show="headings", height=26)
         table.column(column=0, width=300)
         table.column(column=1, width=707)
-        table.heading("id", text="Магазин", command=lambda: self.table_sort(columns[0], self.table6, "magazin_kruglosutoch", False))
-        table.heading("Название", text="Название Магазина", command=lambda: self.table_sort(columns[1], self.table6, "magazin_kruglosutoch", False))
+        table.heading("id", text="Магазин", command=lambda: self.table_sort(columns[0], self.table6, False,
+                                                                            "magazin_kruglosutoch"))
+        table.heading("Название", text="Название Магазина", command=lambda: self.table_sort(columns[1], self.table6,
+                                                                                            False,
+                                                                                            "magazin_kruglosutoch"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from magazin_kruglosutoch")
@@ -376,11 +424,20 @@ class UserPanel(object):
         table.column(column=2, width=150)
         table.column(column=3, width=250)
         table.column(column=4, width=150)
-        table.heading("Название", text="Название Магазина", command=lambda: self.table_sort(columns[0], self.table7, "magazin_contact_data", False))
-        table.heading("Адрес", text="Адрес Магазина", command=lambda: self.table_sort(columns[1], self.table7, "magazin_contact_data", False))
-        table.heading("ТелефонМагазина", text="Телефон Магазина", command=lambda: self.table_sort(columns[2], self.table7, "magazin_contact_data", False))
-        table.heading("ФИОАдминистратора", text="ФИО администратора", command=lambda: self.table_sort(columns[3], self.table7, "magazin_contact_data", False))
-        table.heading("ТелефонАдминистратора", text="Телефон администратора", command=lambda: self.table_sort(columns[4], self.table7, "magazin_contact_data", False))
+        table.heading("Название", text="Название Магазина", command=lambda: self.table_sort(columns[0], self.table7,
+                                                                                            False,
+                                                                                            "magazin_contact_data"))
+        table.heading("Адрес", text="Адрес Магазина", command=lambda: self.table_sort(columns[1], self.table7, False,
+                                                                                      "magazin_contact_data"))
+        table.heading("ТелефонМагазина", text="Телефон Магазина", command=lambda: self.table_sort(columns[2],
+                                                                                                  self.table7, False,
+                                                                                                  "magazin_contact_data"))
+        table.heading("ФИОАдминистратора", text="ФИО администратора", command=lambda: self.table_sort(columns[3],
+                                                                                                      self.table7,
+                                                                                                      False,
+                                                                                                      "magazin_contact_data"))
+        table.heading("ТелефонАдминистратора", text="Телефон администратора", command=lambda: self.table_sort(
+            columns[4], self.table7, False, "magazin_contact_data"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from magazin_contact_data")
@@ -393,8 +450,13 @@ class UserPanel(object):
         table = ttk.Treeview(columns=columns, show="headings", height=26)
         table.column(column=0, width=707)
         table.column(column=1, width=300)
-        table.heading("Категория", text="Название категории", command=lambda: self.table_sort(columns[0], self.table8, "magazin_count_by_kategor", False))
-        table.heading("КоличествоМагазинов", text="Количество магазинов", command=lambda: self.table_sort(columns[1], self.table8, "magazin_count_by_kategor", False))
+        table.heading("Категория", text="Название категории", command=lambda: self.table_sort(columns[0], self.table8,
+                                                                                              False,
+                                                                                              "magazin_count_by_kategor"))
+        table.heading("КоличествоМагазинов", text="Количество магазинов", command=lambda: self.table_sort(columns[1],
+                                                                                                          self.table8,
+                                                                                                          False,
+                                                                                                          "magazin_count_by_kategor"))
         table.place(x=372, y=109)
 
         self.connect_cursor.execute("SELECT * from magazin_count_by_kategor")
