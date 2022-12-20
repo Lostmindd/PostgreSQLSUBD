@@ -64,7 +64,7 @@ class UserPanel(object):
         select_str = ""
         for i in range(len(columns)):
             if entry[i].get() != 'none' and entry[i].get() != '':
-                select_str += table_name + "." + columns[i] + " " + entry[i].get() + " and "
+                select_str += table_name + "." + columns[i] + " " + entry[i].get() + " and  "
         return select_str
     def table_search_by_constructor(self, magazin_entry, rayon_entry, kategor_entry, admin_entry):
         magazin_columns_name = ["rayon", "adress", "chas_rab", "telefon", "kategor", "nazv", "administrator"]
@@ -86,10 +86,8 @@ class UserPanel(object):
         query_str += ("WHERE " + self.create_where_line(magazin_columns_name, magazin_entry, 'magazin') +
                       self.create_where_line(rayon_columns_name, rayon_entry, 'rayon') +
                       self.create_where_line(kategor_columns_name, kategor_entry, ' kategor') +
-                      self.create_where_line(admin_columns_name, admin_entry, 'administrator'))[:-5]
-
-
-        print(query_str)
+                      self.create_where_line(admin_columns_name, admin_entry, 'administrator'))[:-6]
+        self.create_constructor_query_table(query_str)
 
 
     def constructor_columns_entry_create(self, count, x, but_indent=80):
@@ -104,6 +102,24 @@ class UserPanel(object):
             but_indent += 26
         return magazin_entry
 
+    def create_constructor_query_table(self, query):
+        self.connect_cursor.execute(query)
+        records = self.connect_cursor.fetchall()
+
+        table = ttk.Treeview(columns=columns, show="headings", height=10)
+        table.column(column=0, width=300)
+        table.column(column=1, width=707)
+        table.heading("kategor", text="Категория",
+                      command=lambda: self.table_sort(columns[0], self.table2, "kategor", False))
+        table.heading("nazv", text="Название",
+                      command=lambda: self.table_sort(columns[1], self.table2, "kategor", False))
+        table.place(x=372, y=109)
+
+        self.connect_cursor.execute("SELECT * from kategor")
+        records = self.connect_cursor.fetchall()
+        for record in records:
+            table.insert("", tk.END, values=record)
+        return table
     def constructor_columns_buttons_create(self, columns_name_list, x, but_indent=80):
         entry_indent = 170
         but_indent += 3
@@ -126,7 +142,8 @@ class UserPanel(object):
 
     def request_constructor(self):
         self.block2.lift()
-
+        table_block = tk.Label(width=146, height=26, bg="grey25", relief=tk.RAISED)
+        table_block.place(x=363, y=300)
         magazin_but = tk.Button(text='Магазин', width=25, font=("Verdana", 13), command=lambda: self.block_show(magazin_block, magazin_but, True))
         rayon_but = tk.Button(text='Район', width=25, font=("Verdana", 13), command=lambda: self.block_show(rayon_block, rayon_but, True))
         kategor_but = tk.Button(text='Категория', width=25, font=("Verdana", 13), command=lambda: self.block_show(kategor_block, kategor_but, True))
