@@ -17,7 +17,7 @@ class UserPanel(object):
         self.table7 = self.create_magazin_contact_data_view()
         self.table8 = self.create_magazin_count_by_kategor_view()
         self.current_columns = ""
-        self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=5)
+        self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=4)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         self.buttons_list = []
     bg_color = "gray75"
@@ -41,30 +41,38 @@ class UserPanel(object):
 
     def view_tables(self):
         pass
-    def block_show(self, block, button, hide):
+    def block_show(self, block, button, hide, entry = None):
         if hide:
             block.lower()
-        else: block.lift()
-        button['command'] = lambda: self.block_show(block, button, not hide)
+        else:
+            block.lift()
+            if entry != None:
+                entry.delete(0, 'end')
+        button['command'] = lambda: self.block_show(block, button, not hide, entry)
 
 
-    def constructor_option_create(self, columns_name_list, x, but_indent=80):
+    def constructor_columns_entry_create(self, count, x, but_indent=80):
         entry_indent = 170
         but_indent += 3
         magazin_entry = []
+        for i in range(count):
+            magazin_entry.append(tk.Entry(width=14, font=("Verdana", 9)))
+        for entry in magazin_entry:
+            entry.place(x=x+entry_indent, y=but_indent)
+            but_indent += 26
+        return magazin_entry
+
+    def constructor_columns_buttons_create(self, columns_name_list, x, but_indent=80):
+        entry_indent = 170
+        but_indent += 3
         magazin_blocks = []
         magazin_plus = []
         notice = tk.Label(text='столбец               условие отбора', fg="blue", bg=self.bg_color, width=40, height=1,
                            font=("Verdana", 10))
         notice.place(x=x, y=but_indent-30)
         for i in range(len(columns_name_list)):
-            magazin_entry.append(tk.Entry(width=14, font=("Verdana", 9)))
             magazin_plus.append(tk.Label(text='+', fg="blue", bg=self.bg_color, width=1, height=1, font=("Verdana", 12)))
             magazin_blocks.append(tk.Label(bg=self.bg_color, width=18, height=1, font=("Verdana", 9)))
-        for entry in magazin_entry:
-            entry.place(x=x+entry_indent, y=but_indent)
-            but_indent += 26
-        but_indent -= (26 * len(columns_name_list))
         for block in magazin_blocks:
             block.place(x=x+entry_indent - 30, y=but_indent)
             but_indent += 26
@@ -74,7 +82,7 @@ class UserPanel(object):
             but_indent += 26
         return magazin_blocks
 
-    def request_constr(self):
+    def request_constructor(self):
         self.block2.lift()
 
         magazin_but = tk.Button(text='Магазин', width=25, font=("Verdana", 13), command=lambda: self.block_show(magazin_block, magazin_but, True))
@@ -88,51 +96,56 @@ class UserPanel(object):
         administrator_but.place(x=1050, y=10)
 
         ###################################
+
         x_indent = 370
         y_indent = 80
-        magazin_blocks = self.constructor_option_create(['Район', 'Адрес', 'Часы работы', 'Телефон', 'Категория магазина',
+        magazin_entry = self.constructor_columns_entry_create(7, x_indent)
+        magazin_blocks = self.constructor_columns_buttons_create(['Район', 'Адрес', 'Часы работы', 'Телефон', 'Категория магазина',
                                         'Название магазина', 'Администратор'], x_indent)
-        b1 = tk.Button(text='Район', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[0], b1, True))
-        b2 = tk.Button(text='Адрес', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[1], b2, True))
-        b3 = tk.Button(text='Часы работы', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[2], b3, True))
-        b4 = tk.Button(text='Телефон', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[3], b4, True))
-        b5 = tk.Button(text='Категория магазина', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[4], b5, True))
-        b6 = tk.Button(text='Название магазина', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[5], b6, True))
-        b7 = tk.Button(text='Администратор', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[6], b7, True))
+        b1 = tk.Button(text='Район', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[0], b1, True, magazin_entry[0]))
+        b2 = tk.Button(text='Адрес', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[1], b2, True, magazin_entry[1]))
+        b3 = tk.Button(text='Часы работы', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[2], b3, True, magazin_entry[2]))
+        b4 = tk.Button(text='Телефон', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[3], b4, True, magazin_entry[3]))
+        b5 = tk.Button(text='Категория магазина', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[4], b5, True, magazin_entry[4]))
+        b6 = tk.Button(text='Название магазина', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[5], b6, True, magazin_entry[5]))
+        b7 = tk.Button(text='Администратор', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[6], b7, True, magazin_entry[6]))
         for button in [b1, b2, b3, b4, b5, b6, b7]:
             button.place(x=x_indent, y=y_indent)
             y_indent += 26
         ############
         x_indent = 720
         y_indent = 80
-        magazin_blocks2 = self.constructor_option_create(
+        magazin_entry2 = self.constructor_columns_entry_create(2, x_indent)
+        magazin_blocks2 = self.constructor_columns_buttons_create(
             ['Название района', 'Кол. магазинов'], x_indent)
         b8 = tk.Button(text='Название района', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks2[0], b8, True))
+                       command=lambda: self.block_show(magazin_blocks2[0], b8, True, magazin_entry2[0]))
         b9 = tk.Button(text='Кол. магазинов', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks2[1], b9, True))
+                       command=lambda: self.block_show(magazin_blocks2[1], b9, True, magazin_entry2[1]))
         for button in [b8, b9]:
             button.place(x=x_indent, y=y_indent)
             y_indent += 26
-        magazin_blocks3 = self.constructor_option_create(
+        magazin_entry3 = self.constructor_columns_entry_create(1, x_indent, 236)
+        magazin_blocks3 = self.constructor_columns_buttons_create(
             ['Название'], x_indent, 236)
         b10 = tk.Button(text='Название района', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks3[0], b10, True))
+                       command=lambda: self.block_show(magazin_blocks3[0], b10, True, magazin_entry3[0]))
         b10.place(x=x_indent, y=236)
         y_indent += 26
         ############
         x_indent = 1050
         y_indent = 80
-        magazin_blocks4 = self.constructor_option_create(
+        magazin_entry4 = self.constructor_columns_entry_create(4, x_indent)
+        magazin_blocks4 = self.constructor_columns_buttons_create(
             ['Фамилия', 'Имя', 'Отчество', 'Телефон'], x_indent)
         b11 = tk.Button(text='Фамилия', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks4[0], b11, True))
+                       command=lambda: self.block_show(magazin_blocks4[0], b11, True, magazin_entry4[0]))
         b12 = tk.Button(text='Имя', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks4[1], b12, True))
+                       command=lambda: self.block_show(magazin_blocks4[1], b12, True, magazin_entry4[1]))
         b13 = tk.Button(text='Отчество', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks4[2], b13, True))
+                       command=lambda: self.block_show(magazin_blocks4[2], b13, True, magazin_entry4[2]))
         b14 = tk.Button(text='Телефон', width=16, font=("Verdana", 9),
-                       command=lambda: self.block_show(magazin_blocks4[3], b14, True))
+                       command=lambda: self.block_show(magazin_blocks4[3], b14, True, magazin_entry4[3]))
         for button in [b11, b12, b13, b14]:
             button.place(x=x_indent, y=y_indent)
             y_indent += 26
@@ -643,8 +656,8 @@ class UserPanel(object):
         view_button.place(x=32, y=200)
 
         request_constr_button = tk.Button(text="Конструктор запросов", bg=self.bg_color,
-                                width=24, font=("Verdana", 14),
-                                command=lambda: self.request_constr())
+                                          width=24, font=("Verdana", 14),
+                                          command=lambda: self.request_constructor())
 
         request_constr_button.place(x=32, y=260)
         ###############################################################################################
@@ -655,5 +668,5 @@ class UserPanel(object):
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
                         magazin_search_but8, search1)
 
-        self.request_constr()
+        self.request_constructor()
         self.window.mainloop()
