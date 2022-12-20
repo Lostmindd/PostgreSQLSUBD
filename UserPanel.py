@@ -41,17 +41,22 @@ class UserPanel(object):
 
     def view_tables(self):
         pass
-    def option_show(self, block, button, hide):
+    def block_show(self, block, button, hide):
         if hide:
             block.lower()
         else: block.lift()
-        button['command'] = lambda: self.option_show(block, button, not hide)
+        button['command'] = lambda: self.block_show(block, button, not hide)
 
-    def constructor_option_create(self, columns_name_list, x, entry_indent, but_indent=50):
+
+    def constructor_option_create(self, columns_name_list, x, but_indent=80):
+        entry_indent = 170
         but_indent += 3
         magazin_entry = []
         magazin_blocks = []
         magazin_plus = []
+        notice = tk.Label(text='столбец               условие отбора', fg="blue", bg=self.bg_color, width=40, height=1,
+                           font=("Verdana", 10))
+        notice.place(x=x, y=but_indent-30)
         for i in range(len(columns_name_list)):
             magazin_entry.append(tk.Entry(width=14, font=("Verdana", 9)))
             magazin_plus.append(tk.Label(text='+', fg="blue", bg=self.bg_color, width=1, height=1, font=("Verdana", 12)))
@@ -71,44 +76,75 @@ class UserPanel(object):
 
     def request_constr(self):
         self.block2.lift()
-        magazin = tk.IntVar()
-        rayon = tk.IntVar()
-        kategor = tk.IntVar()
-        administrator = tk.IntVar()
 
-        magazin_opt = tk.Checkbutton(self.window, text="Магазин", variable=magazin, font=("Verdana", 12))
-        rayon_opt = tk.Checkbutton(self.window, text="Район", variable=rayon, font=("Verdana", 12))
-        kategor_opt = tk.Checkbutton(self.window, text="Категория", variable=kategor, font=("Verdana", 12))
-        administrator_opt = tk.Checkbutton(self.window, text="Администратор", variable=administrator, font=("Verdana", 12))
+        magazin_but = tk.Button(text='Магазин', width=25, font=("Verdana", 13), command=lambda: self.block_show(magazin_block, magazin_but, True))
+        rayon_but = tk.Button(text='Район', width=25, font=("Verdana", 13), command=lambda: self.block_show(rayon_block, rayon_but, True))
+        kategor_but = tk.Button(text='Категория', width=25, font=("Verdana", 13), command=lambda: self.block_show(kategor_block, kategor_but, True))
+        administrator_but = tk.Button(text='Администратор', width=25, font=("Verdana", 13), command=lambda: self.block_show(administrator_block, administrator_but, True))
 
-        magazin_opt.place(x=370, y=10)
-        rayon_opt.place(x=760, y=10)
-        kategor_opt.place(x=760, y=166)
-        administrator_opt.place(x=1150, y=10)
+        magazin_but.place(x=370, y=10)
+        rayon_but.place(x=720, y=10)
+        kategor_but.place(x=720, y=166)
+        administrator_but.place(x=1050, y=10)
 
         ###################################
+        x_indent = 370
+        y_indent = 80
         magazin_blocks = self.constructor_option_create(['Район', 'Адрес', 'Часы работы', 'Телефон', 'Категория магазина',
-                                        'Название магазина', 'Администратор'], 370, 170)
-        b1 = tk.Button(text='Район', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[0], b1, True))
-        b2 = tk.Button(text='Адрес', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[1], b2, True))
-        b3 = tk.Button(text='Часы работы', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[2], b3, True))
-        b4 = tk.Button(text='Телефон', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[3], b4, True))
-        b5 = tk.Button(text='Категория магазина', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[4], b5, True))
-        b6 = tk.Button(text='Название магазина', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[5], b6, True))
-        b7 = tk.Button(text='Администратор', width=16, font=("Verdana", 9), command=lambda: self.option_show(magazin_blocks[6], b7, True))
-        but_indent = 50
+                                        'Название магазина', 'Администратор'], x_indent)
+        b1 = tk.Button(text='Район', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[0], b1, True))
+        b2 = tk.Button(text='Адрес', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[1], b2, True))
+        b3 = tk.Button(text='Часы работы', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[2], b3, True))
+        b4 = tk.Button(text='Телефон', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[3], b4, True))
+        b5 = tk.Button(text='Категория магазина', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[4], b5, True))
+        b6 = tk.Button(text='Название магазина', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[5], b6, True))
+        b7 = tk.Button(text='Администратор', width=16, font=("Verdana", 9), command=lambda: self.block_show(magazin_blocks[6], b7, True))
         for button in [b1, b2, b3, b4, b5, b6, b7]:
-            button.place(x=370, y=but_indent)
-            but_indent += 26
-        self.constructor_option_create(
-            ['Название района', 'Кол. магазинов'], 760, 150)
-        self.constructor_option_create(
-            ['Название'], 760, 150, 206)
-        self.constructor_option_create(
-            ['Фамилия', 'Имя', 'Отчество', 'телефон'], 1150, 100)
-
+            button.place(x=x_indent, y=y_indent)
+            y_indent += 26
+        ############
+        x_indent = 720
+        y_indent = 80
+        magazin_blocks2 = self.constructor_option_create(
+            ['Название района', 'Кол. магазинов'], x_indent)
+        b8 = tk.Button(text='Название района', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks2[0], b8, True))
+        b9 = tk.Button(text='Кол. магазинов', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks2[1], b9, True))
+        for button in [b8, b9]:
+            button.place(x=x_indent, y=y_indent)
+            y_indent += 26
+        magazin_blocks3 = self.constructor_option_create(
+            ['Название'], x_indent, 236)
+        b10 = tk.Button(text='Название района', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks3[0], b10, True))
+        b10.place(x=x_indent, y=236)
+        y_indent += 26
+        ############
+        x_indent = 1050
+        y_indent = 80
+        magazin_blocks4 = self.constructor_option_create(
+            ['Фамилия', 'Имя', 'Отчество', 'Телефон'], x_indent)
+        b11 = tk.Button(text='Фамилия', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks4[0], b11, True))
+        b12 = tk.Button(text='Имя', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks4[1], b12, True))
+        b13 = tk.Button(text='Отчество', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks4[2], b13, True))
+        b14 = tk.Button(text='Телефон', width=16, font=("Verdana", 9),
+                       command=lambda: self.block_show(magazin_blocks4[3], b14, True))
+        for button in [b11, b12, b13, b14]:
+            button.place(x=x_indent, y=y_indent)
+            y_indent += 26
         ##################################
-
+        magazin_block = tk.Label(bg=self.bg_color, width=40, height=14)
+        magazin_block.place(x=370, y=47)
+        rayon_block = tk.Label(bg=self.bg_color, width=40, height=7)
+        rayon_block.place(x=720, y=47)
+        kategor_block = tk.Label(bg=self.bg_color, width=40, height=4)
+        kategor_block.place(x=720, y=202)
+        administrator_block = tk.Label(bg=self.bg_color, width=40, height=9)
+        administrator_block.place(x=1050, y=47)
         # block = tk.Label(width=146, height=41, bg="grey25", relief=tk.RAISED)
         # block.place(x=363, y=72)
 
