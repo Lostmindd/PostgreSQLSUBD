@@ -2,13 +2,14 @@ import tkinter as tk
 import UserPanel
 import psycopg2
 
-class AdminPanel(UserPanel.UserPanel):
+class ModerPanel(UserPanel.UserPanel):
     def __init__(self, connect_cursor, user_level):
         super().__init__(connect_cursor, user_level)
         self.table1.bind('<<TreeviewSelect>>', self.edit_table1)
         self.table2.bind('<<TreeviewSelect>>', self.edit_table2)
         self.table3.bind('<<TreeviewSelect>>', self.edit_table3)
         self.table4.bind('<<TreeviewSelect>>', self.edit_table4)
+
 
 
     def delete_record(self, table_name, table):
@@ -37,7 +38,6 @@ class AdminPanel(UserPanel.UserPanel):
         row = table.item(table.selection())
         key_column = row['values'][0]
         records = self.get_search_entry()
-        del records[0]
         for i in range(len(records)):
             if records[i] != '':
                 search_str += columns[i] + " = '" + records[i] + "', "
@@ -54,7 +54,7 @@ class AdminPanel(UserPanel.UserPanel):
     def edit_table1(self, event):
         self.fill_search_entry(self.table1)
         redact = tk.Button(text="Редакт", width=10, font=("Verdana", 8), bg="DarkOliveGreen1",
-                           command=lambda: self.table_update('magazin', self.table1, ["rayon", "kategor", "administrator", "adress", "chas_rab", "telefon", "nazv"]))
+                           command=lambda: self.table_update('magazin', self.table1, ["magazin", "rayon", "kategor", "administrator", "adress", "chas_rab", "telefon", "nazv"]))
         redact.place(x=1131, y=50)
         delete = tk.Button(text="Удален", width=10, font=("Verdana", 8), bg="firebrick1",
                            command=lambda: self.delete_record('magazin', self.table1))
@@ -63,7 +63,7 @@ class AdminPanel(UserPanel.UserPanel):
     def edit_table2(self, event):
         self.fill_search_entry(self.table2)
         redact = tk.Button(text="Редакт", width=10, font=("Verdana", 8), bg="DarkOliveGreen1",
-                           command=lambda: self.table_update('kategor', self.table2, ["nazv"]))
+                           command=lambda: self.table_update('kategor', self.table2, ["kategor", "nazv"]))
         redact.place(x=1131, y=50)
         delete = tk.Button(text="Удален", width=10, font=("Verdana", 8), bg="firebrick1",
                            command=lambda: self.delete_record('kategor', self.table2))
@@ -72,7 +72,7 @@ class AdminPanel(UserPanel.UserPanel):
     def edit_table3(self, event):
         self.fill_search_entry(self.table3)
         redact = tk.Button(text="Редакт", width=10, font=("Verdana", 8), bg="DarkOliveGreen1",
-                           command=lambda: self.table_update('rayon', self.table3, ["nazv", "kolvo_mag"]))
+                           command=lambda: self.table_update('rayon', self.table3, ["rayon", "nazv", "kolvo_mag"]))
         redact.place(x=1131, y=50)
         delete = tk.Button(text="Удален", width=10, font=("Verdana", 8), bg="firebrick1",
                            command=lambda: self.delete_record('rayon', self.table3))
@@ -81,11 +81,9 @@ class AdminPanel(UserPanel.UserPanel):
     def edit_table4(self, event):
         self.fill_search_entry(self.table4)
         redact = tk.Button(text="Редакт", width=10, font=("Verdana", 8), bg="DarkOliveGreen1",
-                           command=lambda: self.table_update('administrator', self.table4, ["imya", "famil", "otch", "telefon"]))
+                           command=lambda: self.table_update('administrator', self.table4, ["administrator", "imya", "famil", "otch", "telefon"]))
         redact.place(x=1131, y=50)
         delete = tk.Button(text="Удален", width=10, font=("Verdana", 8), bg="firebrick1",
                            command=lambda: self.delete_record('administrator', self.table4))
         delete.place(x=1221, y=50)
 
-    def create_admin_function(self):
-        pass

@@ -21,6 +21,7 @@ class UserPanel(object):
         self.bg_color = "gray75"
         self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=5)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
+        self.block3 = tk.Label(width=101, height=21, font=("Verdana", 12), bg="grey25")
         self.buttons_list = []
         self.current_search_entry = []
 
@@ -155,30 +156,43 @@ class UserPanel(object):
             but_indent += 26
         return magazin_entry
 
-    def create_constructor_query_table(self, query_select_part, query_from_part, query_where_part, columns):
+    def create_constructor_query_table(self, query_select_part=None, query_from_part=None, query_where_part=None, columns=None, custom_query=None):
         names_on_rus = {'magazin_rayon': 'Район', 'magazin_adress': 'Адрес', 'magazin_chas_rab': 'Часы Работы', 'magazin_telefon': 'Телефон маг.', 'magazin_kategor': 'Категория',
                         'magazin_nazv': 'Название маг.', 'magazin_administrator': 'Администратор', 'rayon_nazv': 'Название район', 'rayon_kolvo_mag': 'Кол. магазин', 'kategor_nazv': 'Категория',
                         'administrator_famil': 'Фамилия', 'administrator_imya': 'Имя', 'administrator_otch': 'Отчество', 'administrator_telefon': 'Телефон адм.'}
-        if query_select_part == "":
-            query = "SELECT * " + " FROM " + query_from_part
-        else:
-            query = "SELECT " + query_select_part + " FROM " + query_from_part
-        if query_where_part != "":
-            query += " WHERE " + query_where_part
+        if custom_query is None:
+            if query_select_part == "":
+                return
+            else:
+                query = "SELECT " + query_select_part + " FROM " + query_from_part
+            if query_where_part != "":
+                query += " WHERE " + query_where_part
+        else: query = custom_query
         try:
             self.connect_cursor.execute(query)
             records = self.connect_cursor.fetchall()
         except psycopg2.Error:
             self.connect_cursor.execute("ROLLBACK")
+        columns_was_none = False
+        if columns is None:
+            columns_was_none = True
+            columns = []
+            for i in range(len(self.connect_cursor.description)):
+                columns.append(self.connect_cursor.description[i][0])
 
         table = ttk.Treeview(columns=columns, show="headings", height=17)
+
         if len(columns) == 0: column_size = 125
         else: column_size = int(1007 / len(columns))
         for i in range(len(columns)):
             table.column(column=i, width=column_size)
 
-        for column in columns:
-            table.heading(column, text=names_on_rus[column])
+        if columns_was_none:
+            for column in columns:
+                table.heading(column, text=column)
+        else:
+            for column in columns:
+                table.heading(column, text=names_on_rus[column])
         table.place(x=372, y=315)
 
         for record in records:
@@ -283,6 +297,69 @@ class UserPanel(object):
         kategor_block.place(x=720, y=202)
         administrator_block = tk.Label(bg=self.bg_color, width=40, height=9)
         administrator_block.place(x=1050, y=47)
+
+    def custom_request(self, query):
+        self.block3.lift()
+        try:
+            self.connect_cursor.execute(query)
+            server_answer = tk.Label(text=self.connect_cursor.statusmessage, width=70, height=5, font=("Verdana", 12),
+                                     bg="white", relief=tk.RAISED, anchor=tk.NW)
+            server_answer.place(x=372, y=212)
+            self.create_constructor_query_table(None, None, None, None, query)
+        except psycopg2.Error as error:
+            server_answer = tk.Label(text=error.pgcode + error.pgerror, width=70, height=5, font=("Verdana", 12), bg="white", fg="red2", relief=tk.RAISED, anchor=tk.NW)
+            server_answer.place(x=372, y=212)
+            self.connect_cursor.execute("ROLLBACK")
+    def request_handle_button(self):
+        self.block2.lift()
+        request_field_border = tk.Label(width=101, height=38, font=("Verdana", 12), bg="grey25")
+        request_field_border.place(x=367, y=8)
+        request_field = tk.Text(width=100, height=10, font=("Verdana", 12))
+        request_field.place(x=372, y=20)
+        execute_button = tk.Button(text="Запустить",
+                                 width=16, height=2, font=("Verdana", 20),
+                                 command=lambda: self.custom_request(request_field.get(1.0, tk.END)))
+        server_answer_empty = tk.Label(width=70, height=5, font=("Verdana", 12), bg="white", relief=tk.RAISED)
+        server_answer_empty.place(x=372, y=212)
+        table_empty = tk.Label(width=100, height=20, font=("Verdana", 12), bg="white", relief=tk.RAISED)
+        table_empty.place(x=372, y=315)
+        execute_button.place(x=1093, y=215)
+
+    def create_account(self):
+        window = tk.Tk()
+        window = tt.title("Создание аккаунта")
+        window.geometry('320x400')
+        window.resizable(width=False, height=False)
+        window["bg"] = self.bg_color
+
+        notice = tk.Label(
+            text="Вход",
+            fg="white", bg=self.bg_color,
+            width=4, height=3,
+            justify=tk.CENTER,
+            font=("Verdana", 28)
+        )
+        login_note = tk.Label(
+            text="Логин:",
+            fg="white", bg=self.bg_color,
+            width=32, height=2,
+            justify=tk.CENTER,
+            font=("Verdana", 12)
+        )
+        pass_note = tk.Label(
+            text="Пароль:",
+            fg="white", bg=self.bg_color,
+            width=32, height=2,
+            justify=tk.CENTER,
+            font=("Verdana", 12)
+        )
+        empty = tk.Label(width=32, height=2, bg=self.bg_color)
+        login = tk.Entry(width=24, font=("Verdana", 12))
+        password = tk.Entry(width=24, font=("Verdana", 12), show="*")
+        errmsg = tk.StringVar()
+        enter_button = tk.Button(text="Вход",
+                                 width=8, font=("Verdana", 12),
+                                 command=partial(self.try_enter, login, password, errmsg))
     def hide_buttons(self):
         self.search_empty.lift()
 
@@ -831,6 +908,7 @@ class UserPanel(object):
         menu.place(x=56, y=20)
         table_block.place(x=363, y=72)
         self.block2.place(x=360, y=-2)
+        self.block3.place(x=367, y=314)
         block.place(x=0, y=0)
 
 
@@ -849,6 +927,16 @@ class UserPanel(object):
                                           command=lambda: self.request_constructor())
 
         request_constr_button.place(x=32, y=260)
+        if self.user_level > 0:
+            request_handle_button = tk.Button(text="Ручной запрос", bg=self.bg_color,
+                                                    width=24, font=("Verdana", 14),
+                                                    command=lambda: self.request_handle_button())
+            request_handle_button.place(x=32, y=400)
+        if self.user_level > 1:
+            request_handle_button = tk.Button(text="Создать аккаунт", bg=self.bg_color,
+                                                width=24, font=("Verdana", 14),
+                                                command=lambda: self.create_account())
+            request_handle_button.place(x=32, y=460)
         ###############################################################################################
 
         self.show_table_block(self.table1, 'magazin', [magazin_search1, magazin_search2,
@@ -857,5 +945,7 @@ class UserPanel(object):
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
                         magazin_search_but8, search1, insert1, clear1)
 
-        #self.request_constructor()
+        self.request_handle_button()
         self.window.mainloop()
+
+

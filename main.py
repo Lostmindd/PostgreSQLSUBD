@@ -2,7 +2,7 @@ import sys
 import psycopg2
 import UserPanel
 import LoginWindow
-import AdminPanel
+import ModerPanel
 import hashlib
 
 
@@ -28,6 +28,6 @@ connect_cursor = connection.cursor()
 #
 #
 
-admin_window = AdminPanel.AdminPanel(connect_cursor, 1)
+admin_window = ModerPanel.ModerPanel(connect_cursor, 2)
 admin_window.create_window()
 connect_cursor.close()
