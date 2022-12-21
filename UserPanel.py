@@ -60,6 +60,10 @@ class UserPanel(object):
                 self.connect_cursor.execute("INSERT INTO " + table_name + " (" +", ".join(columns) +") VALUES (" + insert_str + ")")
             except psycopg2.Error:
                 self.connect_cursor.execute("ROLLBACK")
+
+    def clear_sarch_field(self, search_entry_list):
+        for entry in search_entry_list:
+            entry.delete(0, 'end')
     def view_tables(self):
         pass
     def block_show(self, block, button, hide, entry = None):
@@ -511,6 +515,10 @@ class UserPanel(object):
                                 command=lambda: self.table_insert("magazin", entry_list,
                                 ["rayon", "kategor", "administrator", "adress", "chas_rab", "telefon", "nazv"]))
             insert1.place(x=1311, y=50)
+
+        clear1 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+                                command=lambda: self.clear_sarch_field(entry_list))
+        clear1.place(x=364, y=50)
         magazin_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         magazin_search_but2 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
@@ -553,9 +561,13 @@ class UserPanel(object):
         search2 = tk.Button(text="Поиск",
                            width=6, font=("Verdana", 9),
                            command=lambda: self.table_search(self.table2, "kategor", entry_list2))
-        insert2 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
-                            command=lambda: self.table_insert("kategor", entry_list2, ["nazv"]))
-        insert2.place(x=1311, y=50)
+        if self.user_level > 0:
+            insert2 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+                                command=lambda: self.table_insert("kategor", entry_list2, ["nazv"]))
+            insert2.place(x=1311, y=50)
+        clear2= tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+                           command=lambda: self.clear_sarch_field(entry_list2))
+        clear2.place(x=364, y=50)
         kategor_search_but1 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         kategor_search_but2 = tk.Label(text="Название", fg="grey6", bg=self.bg_color,
@@ -575,10 +587,14 @@ class UserPanel(object):
         search3 = tk.Button(text="Поиск",
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table3, "rayon", entry_list3))
-        insert3 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
-                            command=lambda: self.table_insert("rayon", entry_list3,
-                                                              ["nazv", "kolvo_mag"]))
-        insert3.place(x=1311, y=50)
+        if self.user_level > 0:
+            insert3 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+                                command=lambda: self.table_insert("rayon", entry_list3,
+                                                                  ["nazv", "kolvo_mag"]))
+            insert3.place(x=1311, y=50)
+        clear3 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+                           command=lambda: self.clear_sarch_field(entry_list3))
+        clear3.place(x=364, y=50)
         rayon_search_but1 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         rayon_search_but2 = tk.Label(text="Название", fg="grey6", bg=self.bg_color,
@@ -605,10 +621,14 @@ class UserPanel(object):
         search4 = tk.Button(text="Поиск",
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table4, "administrator", entry_list4))
-        insert4 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
-                            command=lambda: self.table_insert("administrator", entry_list4,
-                                                              ["imya", "famil", "otch", "telefon"]))
-        insert4.place(x=1311, y=50)
+        if self.user_level > 0:
+            insert4 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+                                command=lambda: self.table_insert("administrator", entry_list4,
+                                                                  ["imya", "famil", "otch", "telefon"]))
+            insert4.place(x=1311, y=50)
+        clear4 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+                           command=lambda: self.clear_sarch_field(entry_list4))
+        clear4.place(x=364, y=50)
         administrator_search_but1 = tk.Label(text="Администратор", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         administrator_search_but2 = tk.Label(text="Имя", fg="grey6", bg=self.bg_color,
@@ -736,16 +756,16 @@ class UserPanel(object):
                                                                    magazin_search_but2, magazin_search_but3,
                                                                    magazin_search_but4, magazin_search_but5,
                                                                    magazin_search_but6, magazin_search_but7,
-                                                                   magazin_search_but8, search1, insert1))
+                                                                   magazin_search_but8, search1, insert1, clear1))
         kategor_button = tk.Button(text="Категории",
                                    width=24, font=("Verdana", 12),
                                    command=lambda: self.show_table_block(self.table2, kategor_search1, kategor_search2,
-                                                                   kategor_search_but1, kategor_search_but2, search2, insert2))
+                                                                   kategor_search_but1, kategor_search_but2, search2, insert2, clear2))
         rayon_button = tk.Button(text="Районы",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table3, rayon_search1, rayon_search2,
                                                                  rayon_search3, rayon_search_but1, rayon_search_but2,
-                                                                 rayon_search_but3, search3, insert3))
+                                                                 rayon_search_but3, search3, insert3, clear3))
         admin_button = tk.Button(text="Администраторы",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table4, administrator_search1,
@@ -754,7 +774,7 @@ class UserPanel(object):
                                                                  administrator_search5, administrator_search_but1,
                                                                  administrator_search_but2, administrator_search_but3,
                                                                  administrator_search_but4,
-                                                                 administrator_search_but5, search4, insert4))
+                                                                 administrator_search_but5, search4, insert4, clear4))
         magazin_button.place(x=370, y=75)
         kategor_button.place(x=625, y=75)
         rayon_button.place(x=879, y=75)
@@ -818,7 +838,7 @@ class UserPanel(object):
                         magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
                         magazin_search8, magazin_search_but1, magazin_search_but2, magazin_search_but3,
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
-                        magazin_search_but8, search1, insert1)
+                        magazin_search_but8, search1, insert1, clear1)
 
         #self.request_constructor()
         self.window.mainloop()
