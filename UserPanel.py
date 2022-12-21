@@ -25,6 +25,7 @@ class UserPanel(object):
         self.buttons_list = []
         self.current_search_entry = []
         self.table_block = tk.Label(width=146, height=41, bg="grey25", relief=tk.RAISED)
+
     def table_search(self, table, table_name, search_entry_list):
         search_str = ""
         i = 0
@@ -67,9 +68,6 @@ class UserPanel(object):
             except psycopg2.Error:
                 self.connect_cursor.execute("ROLLBACK")
 
-
-
-
     def clear_search_field(self):
         for entry in self.current_search_entry:
             entry.delete(0, 'end')
@@ -92,6 +90,7 @@ class UserPanel(object):
         table.delete(*table.get_children())
         for record in records:
             table.insert("", tk.END, values=record)
+
     def constructor_table_columns(self, columns, entry, table_name):
         selected_columns = []
         for i in range(len(columns)):
@@ -112,6 +111,7 @@ class UserPanel(object):
             if entry[i].get() != 'none' and entry[i].get() != '':
                 select_str += table_name + "." + columns[i] + " " + entry[i].get() + " and  "
         return select_str
+
     def form_request(self, magazin_entry, rayon_entry, kategor_entry, admin_entry):
         magazin_columns_name = ["rayon", "adress", "chas_rab", "telefon", "kategor", "nazv", "administrator"]
         rayon_columns_name = ["nazv", "kolvo_mag"]
@@ -141,7 +141,6 @@ class UserPanel(object):
         self.constructor_table_columns(admin_columns_name, admin_entry, 'administrator'))
 
         self.create_constructor_query_table(query_select_part, query_from_part, query_where_part, columns)
-
 
     def constructor_columns_entry_create(self, count, x, but_indent=80):
         entry_indent = 170
@@ -196,6 +195,7 @@ class UserPanel(object):
 
         for record in records:
             table.insert("", tk.END, values=record)
+
     def constructor_columns_buttons_create(self, columns_name_list, x, but_indent=80):
         entry_indent = 170
         but_indent += 3
@@ -289,7 +289,6 @@ class UserPanel(object):
             y_indent += 26
         ##################################
 
-
     def custom_request(self, query):
         self.block3.lift()
         if query.find('auth') !=-1: return
@@ -304,6 +303,7 @@ class UserPanel(object):
             server_answer = tk.Label(text=error.pgcode + error.pgerror, width=70, height=5, font=("Verdana", 12), bg="white", fg="red2", relief=tk.RAISED, anchor=tk.NW)
             server_answer.place(x=372, y=212)
             self.connect_cursor.execute("ROLLBACK")
+
     def custom_request_button(self):
         self.block2.lift()
         request_field_border = tk.Label(width=101, height=38, font=("Verdana", 12), bg="grey25")
@@ -484,6 +484,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_rayon_table(self):
         columns = ("rayon", "nazv", "kolvo_mag")
         table = ttk.Treeview(columns=columns, show="headings", height=26)
@@ -501,6 +502,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_administrator_table(self):
         columns = ("administrator", "imya", "famil", "otch", "telefon")
         table = ttk.Treeview(columns=columns, show="headings", height=26)
@@ -526,6 +528,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_magazin_kategor_rayon_view(self):
         columns = ("Название", "Категория", "Район")
         table = ttk.Treeview(columns=columns, show="headings", height=26)
@@ -547,6 +550,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_magazin_kruglosutoch_view(self):
         columns = ("id", "Название")
         table = ttk.Treeview(columns=columns, show="headings", height=26)
@@ -564,6 +568,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_magazin_contact_data_view(self):
         columns = ("Название", "Адрес", "ТелефонМагазина",
                    "ФИОАдминистратора", "ТелефонАдминистратора")
@@ -594,6 +599,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_magazin_count_by_kategor_view(self):
         columns = ("Категория", "КоличествоМагазинов")
         table = ttk.Treeview(columns=columns, show="headings", height=26)
@@ -613,6 +619,7 @@ class UserPanel(object):
         for record in records:
             table.insert("", tk.END, values=record)
         return table
+
     def create_window(self):
         self.window.title("Окно пользователя")
         self.window.geometry('1400x700')
