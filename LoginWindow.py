@@ -9,7 +9,7 @@ class LoginWindow(object):
         self.connect_cursor = connect_cursor
         self.window = tk.Tk()
         self.level = -1
-    bg_color = "black"
+    bg_color = "gray22"
 
     def try_enter(self, login, passw, errmsg):
         self.connect_cursor.execute("SELECT pass, level from auth where login = '" + login.get() + "'")

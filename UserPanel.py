@@ -2,7 +2,7 @@ import tkinter.ttk as ttk
 import tkinter as tk
 from tkinter import Listbox
 import psycopg2
-
+import hashlib
 
 class UserPanel(object):
     def __init__(self, connect_cursor, user_level):
@@ -24,7 +24,7 @@ class UserPanel(object):
         self.block3 = tk.Label(width=101, height=21, font=("Verdana", 12), bg="grey25")
         self.buttons_list = []
         self.current_search_entry = []
-
+        self.table_block = tk.Label(width=146, height=41, bg="grey25", relief=tk.RAISED)
     def table_search(self, table, table_name, search_entry_list):
         search_str = ""
         i = 0
@@ -73,8 +73,7 @@ class UserPanel(object):
     def clear_search_field(self):
         for entry in self.current_search_entry:
             entry.delete(0, 'end')
-    def view_tables(self):
-        pass
+
     def block_show(self, block, button, hide, entry = None):
         if hide:
             block.lower()
@@ -221,10 +220,10 @@ class UserPanel(object):
         self.block2.lift()
         table_block = tk.Label(width=146, height=26, bg="grey25", relief=tk.RAISED)
         table_block.place(x=363, y=300)
-        magazin_but = tk.Button(text='Магазин', width=25, font=("Verdana", 13), command=lambda: self.block_show(magazin_block, magazin_but, True))
-        rayon_but = tk.Button(text='Район', width=25, font=("Verdana", 13), command=lambda: self.block_show(rayon_block, rayon_but, True))
-        kategor_but = tk.Button(text='Категория', width=25, font=("Verdana", 13), command=lambda: self.block_show(kategor_block, kategor_but, True))
-        administrator_but = tk.Button(text='Администратор', width=25, font=("Verdana", 13), command=lambda: self.block_show(administrator_block, administrator_but, True))
+        magazin_but = tk.Button(text='Магазин', width=25, font=("Verdana", 13))
+        rayon_but = tk.Button(text='Район', width=25, font=("Verdana", 13))
+        kategor_but = tk.Button(text='Категория', width=25, font=("Verdana", 13))
+        administrator_but = tk.Button(text='Администратор', width=25, font=("Verdana", 13))
 
         magazin_but.place(x=370, y=10)
         rayon_but.place(x=720, y=10)
@@ -289,28 +288,23 @@ class UserPanel(object):
             button.place(x=x_indent, y=y_indent)
             y_indent += 26
         ##################################
-        magazin_block = tk.Label(bg=self.bg_color, width=40, height=14)
-        magazin_block.place(x=370, y=47)
-        rayon_block = tk.Label(bg=self.bg_color, width=40, height=7)
-        rayon_block.place(x=720, y=47)
-        kategor_block = tk.Label(bg=self.bg_color, width=40, height=4)
-        kategor_block.place(x=720, y=202)
-        administrator_block = tk.Label(bg=self.bg_color, width=40, height=9)
-        administrator_block.place(x=1050, y=47)
+
 
     def custom_request(self, query):
         self.block3.lift()
+        if query.find('auth') !=-1: return
         try:
             self.connect_cursor.execute(query)
             server_answer = tk.Label(text=self.connect_cursor.statusmessage, width=70, height=5, font=("Verdana", 12),
                                      bg="white", relief=tk.RAISED, anchor=tk.NW)
             server_answer.place(x=372, y=212)
             self.create_constructor_query_table(None, None, None, None, query)
+            self.connect_cursor.execute("COMMIT")
         except psycopg2.Error as error:
             server_answer = tk.Label(text=error.pgcode + error.pgerror, width=70, height=5, font=("Verdana", 12), bg="white", fg="red2", relief=tk.RAISED, anchor=tk.NW)
             server_answer.place(x=372, y=212)
             self.connect_cursor.execute("ROLLBACK")
-    def request_handle_button(self):
+    def custom_request_button(self):
         self.block2.lift()
         request_field_border = tk.Label(width=101, height=38, font=("Verdana", 12), bg="grey25")
         request_field_border.place(x=367, y=8)
@@ -325,41 +319,81 @@ class UserPanel(object):
         table_empty.place(x=372, y=315)
         execute_button.place(x=1093, y=215)
 
-    def create_account(self):
-        window = tk.Tk()
-        window = tt.title("Создание аккаунта")
-        window.geometry('320x400')
-        window.resizable(width=False, height=False)
-        window["bg"] = self.bg_color
+    def create_account(self, entry, errmsg):
+        errmsg.set("")
+        empty_entry = 0
+        for data in entry:
+            if data.get() == "":
+                empty_entry += 1
+        if empty_entry > 0:
+            errmsg.set("Нужно заполнить все поля")
+            return
+        if int(entry[2].get()) >= self.user_level:
+            errmsg.set("У вас недостаточно прав для создания этого уровня привилегий")
+            return
 
+        try:
+            hash_pass = hashlib.sha1(entry[1].get().encode('utf-8'))
+            self.connect_cursor.execute("INSERT INTO auth VALUES ( '" + entry[0].get() + "', '" + hash_pass.hexdigest() + "', '" + entry[2].get() + "') ")
+            self.connect_cursor.execute("COMMIT")
+        except psycopg2.Error:
+            self.connect_cursor.execute("ROLLBACK")
+
+    def create_account_button(self):
+        self.block2.lift()
+        border = tk.Label(width=40, height=30, font=("Verdana", 12), bg="grey25")
+        border.place(x=660, y=80)
+        main_block = tk.Label(width=38, height=28, font=("Verdana", 12), bg="grey38")
+        main_block.place(x=670, y=96)
         notice = tk.Label(
-            text="Вход",
-            fg="white", bg=self.bg_color,
-            width=4, height=3,
+            text="Данные",
+            fg="white", bg="grey38",
+            width=10, height=2,
             justify=tk.CENTER,
-            font=("Verdana", 28)
+            font=("Verdana", 38)
         )
         login_note = tk.Label(
             text="Логин:",
-            fg="white", bg=self.bg_color,
-            width=32, height=2,
+            fg="white", bg="grey38",
+            width=10, height=2,
             justify=tk.CENTER,
-            font=("Verdana", 12)
+            font=("Verdana", 16)
         )
         pass_note = tk.Label(
             text="Пароль:",
-            fg="white", bg=self.bg_color,
-            width=32, height=2,
+            fg="white", bg="grey38",
+            width=10, height=2,
             justify=tk.CENTER,
-            font=("Verdana", 12)
+            font=("Verdana", 16)
         )
-        empty = tk.Label(width=32, height=2, bg=self.bg_color)
-        login = tk.Entry(width=24, font=("Verdana", 12))
-        password = tk.Entry(width=24, font=("Verdana", 12), show="*")
+        level_note = tk.Label(
+            text="Уровень доступа:",
+            fg="white", bg="grey38",
+            width=17, height=2,
+            justify=tk.CENTER,
+            font=("Verdana", 16)
+        )
+        login = tk.Entry(width=26, font=("Verdana", 15))
+        password = tk.Entry(width=26, font=("Verdana", 15), show="*")
+        level = tk.Entry(width=1, font=("Verdana", 15))
         errmsg = tk.StringVar()
-        enter_button = tk.Button(text="Вход",
-                                 width=8, font=("Verdana", 12),
-                                 command=partial(self.try_enter, login, password, errmsg))
+        create_button = tk.Button(text="Создать",
+                                 width=8, font=("Verdana", 16),
+                                 command= lambda: self.create_account([login, password, level], errmsg))
+
+        error_note = tk.Label(foreground="red", textvariable=errmsg, wraplength=250,
+                              bg="grey38", font=("Verdana", 12))
+
+        notice.place(x=695, y=100)
+        login_note.place(x=790, y=250)
+        login.place(x=693, y=300)
+        pass_note.place(x=790, y=320)
+        password.place(x=693, y=370)
+        level_note.place(x=730, y=405)
+        level.place(x=950, y=420)
+        create_button.place(x=800, y=500)
+        error_note.place(x=740, y=540)
+
     def hide_buttons(self):
         self.search_empty.lift()
 
@@ -368,12 +402,16 @@ class UserPanel(object):
             button.lift()
 
     def show_table_block(self, table, table_name, search_entry, *args):
+        self.block2.lift()
+        self.table_block.lift()
         self.current_search_entry = search_entry
         self.hide_buttons()
         for elem in args:
-            elem.lift()
+            if elem is not None:
+                elem.lift()
         for elem in search_entry:
-            elem.lift()
+            if elem is not None:
+                elem.lift()
         table.lift()
         self.refresh_table(table, table_name)
         self.clear_search_field()
@@ -582,14 +620,17 @@ class UserPanel(object):
         self.window["bg"] = self.bg_color
 
         block = tk.Label(width=50, height=47, bg="grey38", relief=tk.RAISED)
-        table_block = tk.Label(width=146, height=41, bg="grey25", relief=tk.RAISED)
         menu = tk.Label(
             text="Меню",
             fg="grey6", bg="grey38",
             width=5, height=1,
             font=("Arial Black", 50)  # Franklin Gothic
         )
-
+        if self.user_level == 0:
+            insert1 = None
+            insert2 = None
+            insert3 = None
+            insert4 = None
         self.search_empty.place(x=360, y=-8)
         ####################################### Поиск магазина ######################################
         magazin_search1 = tk.Entry(width=14, font=("Verdana", 10))
@@ -606,12 +647,12 @@ class UserPanel(object):
                            width=6, font=("Verdana", 9),
                            command=lambda: self.table_search(self.table1, "magazin", entry_list))
         if self.user_level > 0:
-            insert1 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+            insert1 = tk.Button(text="Вставка", width=10, font=("Verdana", 8), bg="light goldenrod",
                                 command=lambda: self.table_insert("magazin", entry_list, self.table1,
                                 ["rayon", "kategor", "administrator", "adress", "chas_rab", "telefon", "nazv"]))
             insert1.place(x=1311, y=50)
 
-        clear1 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+        clear1 = tk.Button(text="Очистка", width=10, font=("Verdana", 8), bg="light steel blue",
                            command=lambda: self.clear_search_field())
         clear1.place(x=364, y=50)
         magazin_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
@@ -657,7 +698,7 @@ class UserPanel(object):
                            width=6, font=("Verdana", 9),
                            command=lambda: self.table_search(self.table2, "kategor", entry_list2))
         if self.user_level > 0:
-            insert2 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+            insert2 = tk.Button(text="Вставка", width=10, font=("Verdana", 8), bg="light goldenrod",
                                 command=lambda: self.table_insert("kategor", entry_list2, self.table2, ["nazv"]))
             insert2.place(x=1311, y=50)
         clear2= tk.Button(text="Очистка", width=10, font=("Verdana", 8),
@@ -683,7 +724,7 @@ class UserPanel(object):
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table3, "rayon", entry_list3))
         if self.user_level > 0:
-            insert3 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+            insert3 = tk.Button(text="Вставка", width=10, font=("Verdana", 8), bg="light goldenrod",
                                 command=lambda: self.table_insert("rayon", entry_list3, self.table3,
                                                                   ["nazv", "kolvo_mag"]))
             insert3.place(x=1311, y=50)
@@ -717,7 +758,7 @@ class UserPanel(object):
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table4, "administrator", entry_list4))
         if self.user_level > 0:
-            insert4 = tk.Button(text="Вставка", width=10, font=("Verdana", 8),
+            insert4 = tk.Button(text="Вставка", width=10, font=("Verdana", 8), bg="light goldenrod",
                                 command=lambda: self.table_insert("administrator", entry_list4, self.table4,
                                                                   ["imya", "famil", "otch", "telefon"]))
             insert4.place(x=1311, y=50)
@@ -906,7 +947,7 @@ class UserPanel(object):
 
         self.buttons_list = [magazin_button, kategor_button, rayon_button, admin_button, view1_button, view2_button, view3_button, view4_button]
         menu.place(x=56, y=20)
-        table_block.place(x=363, y=72)
+        self.table_block.place(x=363, y=72)
         self.block2.place(x=360, y=-2)
         self.block3.place(x=367, y=314)
         block.place(x=0, y=0)
@@ -929,13 +970,13 @@ class UserPanel(object):
         request_constr_button.place(x=32, y=260)
         if self.user_level > 0:
             request_handle_button = tk.Button(text="Ручной запрос", bg=self.bg_color,
-                                                    width=24, font=("Verdana", 14),
-                                                    command=lambda: self.request_handle_button())
+                                              width=24, font=("Verdana", 14),
+                                              command=lambda: self.custom_request_button())
             request_handle_button.place(x=32, y=400)
         if self.user_level > 1:
             request_handle_button = tk.Button(text="Создать аккаунт", bg=self.bg_color,
-                                                width=24, font=("Verdana", 14),
-                                                command=lambda: self.create_account())
+                                              width=24, font=("Verdana", 14),
+                                              command=lambda: self.create_account_button())
             request_handle_button.place(x=32, y=460)
         ###############################################################################################
 
@@ -945,7 +986,6 @@ class UserPanel(object):
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
                         magazin_search_but8, search1, insert1, clear1)
 
-        self.request_handle_button()
         self.window.mainloop()
 
 

@@ -2,7 +2,7 @@ import tkinter as tk
 import UserPanel
 import psycopg2
 
-class ModerPanel(UserPanel.UserPanel):
+class AdminPanel(UserPanel.UserPanel):
     def __init__(self, connect_cursor, user_level):
         super().__init__(connect_cursor, user_level)
         self.table1.bind('<<TreeviewSelect>>', self.edit_table1)
