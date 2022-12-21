@@ -3,7 +3,6 @@ import psycopg2
 import UserPanel
 import LoginWindow
 import AdminPanel
-import hashlib
 
 
 connection = psycopg2.connect(

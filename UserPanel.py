@@ -1,6 +1,5 @@
 import tkinter.ttk as ttk
 import tkinter as tk
-from tkinter import Listbox
 import psycopg2
 import hashlib
 

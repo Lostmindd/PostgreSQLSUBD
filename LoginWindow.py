@@ -1,5 +1,4 @@
 import tkinter as tk
-import psycopg2
 import hashlib
 from functools import partial
 
