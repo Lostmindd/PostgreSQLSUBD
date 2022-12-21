@@ -28,6 +28,6 @@ connect_cursor = connection.cursor()
 #
 #
 
-admin_window = AdminPanel.AdminPanel(connect_cursor)
+admin_window = AdminPanel.AdminPanel(connect_cursor, 1)
 admin_window.create_window()
 connect_cursor.close()

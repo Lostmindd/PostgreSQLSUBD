@@ -2,12 +2,13 @@ import tkinter as tk
 import UserPanel
 
 class AdminPanel(UserPanel.UserPanel):
-    def __init__(self, connect_cursor):
-        super().__init__(connect_cursor)
+    def __init__(self, connect_cursor, user_level):
+        super().__init__(connect_cursor, user_level)
         self.table1.bind('<<TreeviewSelect>>', self.edit_table)
         self.table2.bind('<<TreeviewSelect>>', self.edit_table)
         self.table3.bind('<<TreeviewSelect>>', self.edit_table)
         self.table5.bind('<<TreeviewSelect>>', self.edit_table)
+
 
 
     def delete_record(self):
@@ -26,5 +27,5 @@ class AdminPanel(UserPanel.UserPanel):
         #     item = self.table1.item(selection)
         #     print(item['values'])
 
-    def create_admin_finction(self):
+    def create_admin_function(self):
         pass
