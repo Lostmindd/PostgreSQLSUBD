@@ -19,9 +19,10 @@ class UserPanel(object):
         self.table8 = self.create_magazin_count_by_kategor_view()
         self.search_where_condition = ""
         self.bg_color = "gray75"
-        self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=4)
+        self.search_empty = tk.Label(fg="grey6", bg=self.bg_color, width=147, height=5)
         self.block2 = tk.Label(width=250, height=47, bg=self.bg_color)
         self.buttons_list = []
+        self.current_search_entry = []
 
     def table_search(self, table, table_name, search_entry_list):
         search_str = ""
@@ -68,8 +69,8 @@ class UserPanel(object):
 
 
 
-    def clear_search_field(self, search_entry_list):
-        for entry in search_entry_list:
+    def clear_search_field(self):
+        for entry in self.current_search_entry:
             entry.delete(0, 'end')
     def view_tables(self):
         pass
@@ -290,6 +291,7 @@ class UserPanel(object):
             button.lift()
 
     def show_table_block(self, table, table_name, search_entry, *args):
+        self.current_search_entry = search_entry
         self.hide_buttons()
         for elem in args:
             elem.lift()
@@ -297,7 +299,7 @@ class UserPanel(object):
             elem.lift()
         table.lift()
         self.refresh_table(table, table_name)
-        self.clear_search_field(search_entry)
+        self.clear_search_field()
         self.search_where_condition = ""
         self.show_buttons()
 
@@ -335,7 +337,7 @@ class UserPanel(object):
                                                                                    "magazin"))
         table.heading("administrator", text="Администратор", command=lambda: self.table_sort(columns[3], self.table1,
                                                                                              False, "magazin"))
-        table.heading("adress", text="Адресс", command=lambda: self.table_sort(columns[4], self.table1, False,
+        table.heading("adress", text="Адрес", command=lambda: self.table_sort(columns[4], self.table1, False,
                                                                                "magazin"))
         table.heading("chas_rab", text="Часы Работы", command=lambda: self.table_sort(columns[5], self.table1, False,
                                                                                       "magazin"))
@@ -511,7 +513,7 @@ class UserPanel(object):
             font=("Arial Black", 50)  # Franklin Gothic
         )
 
-        self.search_empty.place(x=360, y=5)
+        self.search_empty.place(x=360, y=-8)
         ####################################### Поиск магазина ######################################
         magazin_search1 = tk.Entry(width=14, font=("Verdana", 10))
         magazin_search2 = tk.Entry(width=14, font=("Verdana", 10))
@@ -533,7 +535,7 @@ class UserPanel(object):
             insert1.place(x=1311, y=50)
 
         clear1 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
-                           command=lambda: self.clear_search_field(entry_list))
+                           command=lambda: self.clear_search_field())
         clear1.place(x=364, y=50)
         magazin_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
@@ -582,7 +584,7 @@ class UserPanel(object):
                                 command=lambda: self.table_insert("kategor", entry_list2, self.table2, ["nazv"]))
             insert2.place(x=1311, y=50)
         clear2= tk.Button(text="Очистка", width=10, font=("Verdana", 8),
-                          command=lambda: self.clear_search_field(entry_list2))
+                          command=lambda: self.clear_search_field())
         clear2.place(x=364, y=50)
         kategor_search_but1 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
@@ -609,7 +611,7 @@ class UserPanel(object):
                                                                   ["nazv", "kolvo_mag"]))
             insert3.place(x=1311, y=50)
         clear3 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
-                           command=lambda: self.clear_search_field(entry_list3))
+                           command=lambda: self.clear_search_field())
         clear3.place(x=364, y=50)
         rayon_search_but1 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
@@ -643,7 +645,7 @@ class UserPanel(object):
                                                                   ["imya", "famil", "otch", "telefon"]))
             insert4.place(x=1311, y=50)
         clear4 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
-                           command=lambda: self.clear_search_field(entry_list4))
+                           command=lambda: self.clear_search_field())
         clear4.place(x=364, y=50)
         administrator_search_but1 = tk.Label(text="Администратор", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
@@ -784,7 +786,7 @@ class UserPanel(object):
                                                                  rayon_search_but3, search3, insert3, clear3))
         admin_button = tk.Button(text="Администраторы",
                                  width=24, font=("Verdana", 12),
-                                 command=lambda: self.show_table_block(self.table4, 'admin', [administrator_search1,
+                                 command=lambda: self.show_table_block(self.table4, 'administrator', [administrator_search1,
                                                                  administrator_search2,
                                                                  administrator_search3, administrator_search4,
                                                                  administrator_search5], administrator_search_but1,
