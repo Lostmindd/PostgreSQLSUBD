@@ -1041,7 +1041,6 @@ class UserPanel(object):
                         magazin_search8], magazin_search_but1, magazin_search_but2, magazin_search_but3,
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
                         magazin_search_but8, search1, insert1, clear1, save1)
-        self.request_constructor()
         self.window.mainloop()
 
 
