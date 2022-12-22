@@ -204,7 +204,7 @@ class UserPanel(object):
         table = ttk.Treeview(columns=columns, show="headings", height=17)
         save = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
                           command=lambda: self.save_in_file(table, "custom_request"))
-        save.place(x=364, y=279)
+        save.place(x=372, y=292)
         if len(columns) == 0: column_size = 125
         else: column_size = int(1007 / len(columns))
         for i in range(len(columns)):
