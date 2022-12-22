@@ -4,7 +4,6 @@ import UserPanel
 import LoginWindow
 import AdminPanel
 
-
 connection = psycopg2.connect(
   database="kp0092_27",
   user="st0092",

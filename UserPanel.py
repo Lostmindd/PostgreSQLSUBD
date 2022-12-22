@@ -316,7 +316,7 @@ class UserPanel(object):
 
     def custom_request(self, query):
         self.block3.lift()
-        if query.find('auth') !=-1: return
+        if query.find('auth') != -1 and self.user_level < 4: return
         try:
             self.connect_cursor.execute(query)
             server_answer = tk.Label(text=self.connect_cursor.statusmessage, width=70, height=5, font=("Verdana", 12),
