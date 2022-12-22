@@ -2,6 +2,9 @@ import tkinter.ttk as ttk
 import tkinter as tk
 import psycopg2
 import hashlib
+import pandas as pd
+import datetime
+from openpyxl.workbook import Workbook
 
 class UserPanel(object):
     def __init__(self, connect_cursor, user_level):
@@ -37,12 +40,17 @@ class UserPanel(object):
         else: search_str = ""
         self.search_where_condition = search_str
         if search_str == "":
-            self.connect_cursor.execute("SELECT * from " + table_name)
-        else: self.connect_cursor.execute("SELECT * from " + table_name + " WHERE " + search_str)
-        records = self.connect_cursor.fetchall()
-        table.delete(*table.get_children())
-        for record in records:
-            table.insert("", tk.END, values=record)
+            quary ="SELECT * from " + table_name
+        else: quary = "SELECT * from " + table_name + " WHERE " + search_str
+        try:
+            self.connect_cursor.execute(quary)
+            records = self.connect_cursor.fetchall()
+            table.delete(*table.get_children())
+            for record in records:
+                table.insert("", tk.END, values=record)
+
+        except psycopg2.Error:
+            self.connect_cursor.execute("ROLLBACK")
 
     def table_insert(self, table_name, records, table, columns=None):
         empty_records = 0
@@ -70,6 +78,22 @@ class UserPanel(object):
     def clear_search_field(self):
         for entry in self.current_search_entry:
             entry.delete(0, 'end')
+
+    def save_in_file(self, table, table_name):
+        columns = table["columns"]
+        val = []
+        data_dict = {key: list(val) for key in columns}
+        i = 0
+        for line in table.get_children():
+            for value in table.item(line)['values']:
+                current_column = columns[i]
+                data_dict[current_column].append(value)
+                i += 1
+            i = 0
+        output_file = pd.DataFrame(data_dict)
+        now = datetime.datetime.now()
+        filename = table_name + "_" + str(now.day) + "_" + str(now.month)+ "_" + str(now.year)+ "T" + str(now.hour)+ "_" + str(now.minute)+ "_" + str(now.second)
+        output_file.to_excel('./'+ filename +'.xlsx', sheet_name=table_name)
 
     def block_show(self, block, button, hide, entry = None):
         if hide:
@@ -170,15 +194,17 @@ class UserPanel(object):
             records = self.connect_cursor.fetchall()
         except psycopg2.Error:
             self.connect_cursor.execute("ROLLBACK")
+            return
         columns_was_none = False
         if columns is None:
             columns_was_none = True
             columns = []
             for i in range(len(self.connect_cursor.description)):
                 columns.append(self.connect_cursor.description[i][0])
-
         table = ttk.Treeview(columns=columns, show="headings", height=17)
-
+        save = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(table, "custom_request"))
+        save.place(x=364, y=279)
         if len(columns) == 0: column_size = 125
         else: column_size = int(1007 / len(columns))
         for i in range(len(columns)):
@@ -661,6 +687,9 @@ class UserPanel(object):
         clear1 = tk.Button(text="Очистка", width=10, font=("Verdana", 8), bg="light steel blue",
                            command=lambda: self.clear_search_field())
         clear1.place(x=364, y=50)
+        save1 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                           command=lambda: self.save_in_file(self.table1, "magazin"))
+        save1.place(x=454, y=50)
         magazin_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         magazin_search_but2 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
@@ -707,9 +736,12 @@ class UserPanel(object):
             insert2 = tk.Button(text="Вставка", width=10, font=("Verdana", 8), bg="light goldenrod",
                                 command=lambda: self.table_insert("kategor", entry_list2, self.table2, ["nazv"]))
             insert2.place(x=1311, y=50)
-        clear2= tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+        clear2= tk.Button(text="Очистка", width=10, font=("Verdana", 8), bg="light steel blue",
                           command=lambda: self.clear_search_field())
         clear2.place(x=364, y=50)
+        save2 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table2, "kategor"))
+        save2.place(x=454, y=50)
         kategor_search_but1 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         kategor_search_but2 = tk.Label(text="Название", fg="grey6", bg=self.bg_color,
@@ -734,9 +766,12 @@ class UserPanel(object):
                                 command=lambda: self.table_insert("rayon", entry_list3, self.table3,
                                                                   ["nazv", "kolvo_mag"]))
             insert3.place(x=1311, y=50)
-        clear3 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+        clear3 = tk.Button(text="Очистка", width=10, font=("Verdana", 8), bg="light steel blue",
                            command=lambda: self.clear_search_field())
         clear3.place(x=364, y=50)
+        save3 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table3, "rayon"))
+        save3.place(x=454, y=50)
         rayon_search_but1 = tk.Label(text="Район", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         rayon_search_but2 = tk.Label(text="Название", fg="grey6", bg=self.bg_color,
@@ -768,9 +803,12 @@ class UserPanel(object):
                                 command=lambda: self.table_insert("administrator", entry_list4, self.table4,
                                                                   ["imya", "famil", "otch", "telefon"]))
             insert4.place(x=1311, y=50)
-        clear4 = tk.Button(text="Очистка", width=10, font=("Verdana", 8),
+        clear4 = tk.Button(text="Очистка", width=10, font=("Verdana", 8), bg="light steel blue",
                            command=lambda: self.clear_search_field())
         clear4.place(x=364, y=50)
+        save4 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table4, "administrator"))
+        save4.place(x=454, y=50)
         administrator_search_but1 = tk.Label(text="Администратор", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         administrator_search_but2 = tk.Label(text="Имя", fg="grey6", bg=self.bg_color,
@@ -802,6 +840,9 @@ class UserPanel(object):
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table5, "magazin_kategor_rayon", [view1_search1, view1_search2,
                                                               view1_search3]))
+        save5 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table5, "magazin_kategor_rayon"))
+        save5.place(x=364, y=50)
         view1_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
                                      width=14, height=1, font=("Verdana", 9))
         view1_search_but2 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
@@ -824,6 +865,9 @@ class UserPanel(object):
         search6 = tk.Button(text="Поиск",
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table6, "magazin_kruglosutoch", [view2_search1, view2_search2]))
+        save6 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table6, "magazin_kruglosutoch"))
+        save6.place(x=364, y=50)
         view2_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
                                        width=14, height=1, font=("Verdana", 9))
         view2_search_but2 = tk.Label(text="Название магазина", fg="grey6", bg=self.bg_color,
@@ -846,6 +890,9 @@ class UserPanel(object):
                             command=lambda: self.table_search(self.table7, "magazin_contact_data", [view3_search1,
                                                               view3_search2, view3_search3,
                                                               view3_search4, view3_search5]))
+        save7 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table7, "magazin_contact_data"))
+        save7.place(x=364, y=50)
         view3_search_but1 = tk.Label(text="Магазин", fg="grey6", bg=self.bg_color,
                                              width=14, height=1, font=("Verdana", 9))
         view3_search_but2 = tk.Label(text="Адрес", fg="grey6", bg=self.bg_color,
@@ -877,6 +924,9 @@ class UserPanel(object):
                             width=6, font=("Verdana", 9),
                             command=lambda: self.table_search(self.table8, "magazin_count_by_kategor", [view4_search1,
                                                               view4_search2]))
+        save8 = tk.Button(text="Сохранить", width=10, font=("Verdana", 8), bg="light steel blue",
+                          command=lambda: self.save_in_file(self.table8, "magazin_count_by_kategor"))
+        save8.place(x=364, y=50)
         view4_search_but1 = tk.Label(text="Категория", fg="grey6", bg=self.bg_color,
                                      width=14, height=1, font=("Verdana", 9))
         view4_search_but2 = tk.Label(text="Кол-во магазинов", fg="grey6", bg=self.bg_color,
@@ -898,16 +948,16 @@ class UserPanel(object):
                                                                    magazin_search_but2, magazin_search_but3,
                                                                    magazin_search_but4, magazin_search_but5,
                                                                    magazin_search_but6, magazin_search_but7,
-                                                                   magazin_search_but8, search1, insert1, clear1))
+                                                                   magazin_search_but8, search1, insert1, clear1, save1))
         kategor_button = tk.Button(text="Категории",
                                    width=24, font=("Verdana", 12),
                                    command=lambda: self.show_table_block(self.table2, 'kategor', [kategor_search1, kategor_search2],
-                                                                   kategor_search_but1, kategor_search_but2, search2, insert2, clear2))
+                                                                   kategor_search_but1, kategor_search_but2, search2, insert2, clear2, save2))
         rayon_button = tk.Button(text="Районы",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table3, 'rayon', [rayon_search1, rayon_search2,
                                                                  rayon_search3], rayon_search_but1, rayon_search_but2,
-                                                                 rayon_search_but3, search3, insert3, clear3))
+                                                                 rayon_search_but3, search3, insert3, clear3, save3))
         admin_button = tk.Button(text="Администраторы",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table4, 'administrator', [administrator_search1,
@@ -916,7 +966,7 @@ class UserPanel(object):
                                                                  administrator_search5], administrator_search_but1,
                                                                  administrator_search_but2, administrator_search_but3,
                                                                  administrator_search_but4,
-                                                                 administrator_search_but5, search4, insert4, clear4))
+                                                                 administrator_search_but5, search4, insert4, clear4, save4))
         magazin_button.place(x=370, y=75)
         kategor_button.place(x=625, y=75)
         rayon_button.place(x=879, y=75)
@@ -928,11 +978,11 @@ class UserPanel(object):
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table5, 'magazin_kategor_rayon', [view1_search1, view1_search2,
                                                                  view1_search3], view1_search_but1, view1_search_but2,
-                                                                 view1_search_but3, search5))
+                                                                 view1_search_but3, search5, save5))
         view2_button = tk.Button(text="круглосуточные магазины",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table6, 'magazin_kruglosutoch', [view2_search1, view2_search2],
-                                                                 view2_search_but1, view2_search_but2, search6))
+                                                                 view2_search_but1, view2_search_but2, search6, save6))
         view3_button = tk.Button(text="Контактные данные магазина",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table7, 'magazin_contact_data', [view3_search1, view3_search2,
@@ -940,11 +990,11 @@ class UserPanel(object):
                                                                  view3_search_but1,
                                                                  view3_search_but2, view3_search_but3,
                                                                  view3_search_but4,
-                                                                 view3_search_but5, search7))
+                                                                 view3_search_but5, search7, save7))
         view4_button = tk.Button(text="Кол. магазинов (категории)",
                                  width=24, font=("Verdana", 12),
                                  command=lambda: self.show_table_block(self.table8, 'magazin_count_by_kategor', [view4_search1, view4_search2],
-                                                                 view4_search_but1, view4_search_but2, search8))
+                                                                 view4_search_but1, view4_search_but2, search8, save8))
         view1_button.place(x=370, y=658)
         view2_button.place(x=625, y=658)
         view3_button.place(x=879, y=658)
@@ -990,8 +1040,11 @@ class UserPanel(object):
                         magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
                         magazin_search8], magazin_search_but1, magazin_search_but2, magazin_search_but3,
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
-                        magazin_search_but8, search1, insert1, clear1)
-
+                        magazin_search_but8, search1, insert1, clear1, save1)
+        self.request_constructor()
         self.window.mainloop()
+
+
+
 
 
