@@ -1016,7 +1016,7 @@ class UserPanel(object):
                         magazin_search3, magazin_search4, magazin_search5, magazin_search6, magazin_search7,
                         magazin_search8], magazin_search_but1, magazin_search_but2, magazin_search_but3,
                         magazin_search_but4, magazin_search_but5, magazin_search_but6, magazin_search_but7,
-                        magazin_search_but8, search1, insert1, clear1))
+                        magazin_search_but8, search1, insert1, clear1, save1))
         view_button.place(x=32, y=200)
 
         request_constr_button = tk.Button(text="Конструктор запросов", bg=self.bg_color,
